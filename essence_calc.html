@@ -70,7 +70,11 @@
       margin: 0;
     }
 
-    .zone-section { margin-bottom: 20px; }
+    .config-grid select {
+      width: auto;
+      min-width: 120px;
+      margin: 0;
+    }
 
     .tickets-section {
       margin-bottom: 20px;
@@ -211,7 +215,6 @@
     th { text-align: left; padding: 8px 12px; color: #888888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #2a2a2a; }
     td { padding: 8px 12px; color: #cccccc; border-bottom: 1px solid #1a1a1a; }
 
-    .pool-info { font-size: 12px; color: #666666; margin-top: 8px; }
 
     .title-row { display: flex; align-items: center; justify-content: space-between; }
     .title-row h1 { margin: 0; }
@@ -254,7 +257,8 @@
       overflow-y: auto;
     }
     .modal h2 { margin-top: 0; margin-bottom: 16px; }
-    .modal p { font-size: 13px; color: #cccccc; line-height: 1.6; margin-bottom: 12px; }
+    .modal p { font-size: 13px; color: #cccccc; line-height: 1.5; margin: 0 0 6px 0; }
+    .modal p strong { display: block; margin-top: 12px; }
     .modal code {
       background: #1a1a1a;
       padding: 2px 6px;
@@ -280,19 +284,17 @@
       <button class="help-btn" onclick="toggleModal(true)">?</button>
     </div>
     <br>
-    <div class="zone-section">
-      <label>Energy Alluvium</label>
-      <select id="zoneSelect" onchange="onZoneChange()">
-        <option value="the-hub">The Hub</option>
-        <option value="originium-science-park">Originium Science Park</option>
-        <option value="origin-lodespring">Origin Lodespring</option>
-        <option value="power-plateau">Power Plateau</option>
-        <option value="wuling-city">Wuling City</option>
-      </select>
-      <div class="pool-info" id="poolInfo"></div>
-    </div>
-
     <div class="config-grid">
+      <div>
+        <label>Energy Alluvium</label>
+        <select id="zoneSelect" onchange="onZoneChange()">
+          <option value="the-hub">The Hub</option>
+          <option value="originium-science-park">Originium Science Park</option>
+          <option value="origin-lodespring">Origin Lodespring</option>
+          <option value="power-plateau">Power Plateau</option>
+          <option value="wuling-city">Wuling City</option>
+        </select>
+      </div>
       <div>
         <label>Essences / Run</label>
         <input type="number" id="essencesPerRun" value="3" min="1">
@@ -420,10 +422,6 @@
       renderMultiSelects();
       renderBuilds();
       calculate();
-    }
-
-    function renderPoolInfo() {
-      document.getElementById('poolInfo').innerHTML = `Pool sizes: ${SKILL_POOL} skills, ${ATTR_POOL} attributes, ${SEC_POOL} secondaries`;
     }
 
     function toggleDropdown(id) {
@@ -661,7 +659,6 @@
     }
 
     // Initialize
-    renderPoolInfo();
     renderMultiSelects();
     renderBuilds();
     calculate();
@@ -675,6 +672,9 @@
     function toggleModal(open) {
       document.getElementById('helpModal').classList.toggle('open', open);
     }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') toggleModal(false);
+    });
   </script>
 
   <div class="modal-overlay" id="helpModal" onclick="toggleModal(false)">
@@ -695,7 +695,7 @@
       <p><code>Runs = ⌈ln(1 − confidence) / ln(1 − P_run)⌉</code></p>
 
       <p><strong>Sanity Regen</strong></p>
-      <p>1 sanity regenerates every 7 minutes and 12 seconds (432 seconds).</p>
+      <p>1 sanity regenerates every 7 minutes and 12 seconds</p>
     </div>
   </div>
 </body>
