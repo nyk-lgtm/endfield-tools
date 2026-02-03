@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Essence Farming Calculator</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0a0a0a;
+      color: #e0e0e0;
+      margin: 0;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { font-size: 22px; font-weight: 700; color: #feff42; margin-bottom: 4px; letter-spacing: 0.5px; }
+    .subtitle { font-size: 13px; color: #666666; margin-bottom: 24px; }
+    h2 { font-size: 16px; color: #feff42; margin: 0; }
+    h3 { font-size: 14px; color: #999999; margin-bottom: 10px; }
+
+    label { font-size: 11px; color: #888888; text-transform: uppercase; letter-spacing: 1px; display: block; }
+    select, input[type="number"] {
+      width: 100%;
+      padding: 8px;
+      background: #111111;
+      border: 1px solid #333333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+    select:focus, input[type="number"]:focus {
+      outline: none;
+      border-color: #feff42;
+    }
+    .checkbox-label {
+      font-size: 12px;
+      color: #999999;
+      display: flex;
+      align-items: center;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .checkbox-label span { margin-left: 4px; }
+
+    .config-grid {
+      display: flex;
+      gap: 24px;
+      margin-bottom: 20px;
+    }
+    .config-grid > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .config-grid label {
+      margin: 0;
+      white-space: nowrap;
+    }
+    .config-grid input[type="number"] {
+      width: 70px;
+      margin: 0;
+      -moz-appearance: textfield;
+    }
+    .config-grid input[type="number"]::-webkit-outer-spin-button,
+    .config-grid input[type="number"]::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    .zone-section { margin-bottom: 20px; }
+
+    .tickets-section {
+      margin-bottom: 20px;
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 16px;
+    }
+    .tickets-section h2 { margin-top: 0; margin-bottom: 8px; }
+    .tickets-grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 8px;
+    }
+    .multi-select { position: relative; }
+    .multi-select-btn {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px;
+      background: #111111;
+      border: 1px solid #333333;
+      border-radius: 6px;
+      color: #e0e0e0;
+      font-size: 14px;
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .multi-select-btn:hover { border-color: #feff42; }
+    .multi-select-btn .arrow { font-size: 10px; color: #888888; }
+    .multi-select-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: #111111;
+      border: 1px solid #333333;
+      border-radius: 6px;
+      margin-top: 4px;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 100;
+    }
+    .multi-select-dropdown.open { display: block; }
+    .multi-select-dropdown label {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      text-transform: none;
+      letter-spacing: 0;
+      color: #cccccc;
+    }
+    .multi-select-dropdown label:hover { background: #1a1a1a; }
+    .multi-select-dropdown input { margin-right: 8px; accent-color: #feff42; }
+
+    .builds-section { margin-bottom: 20px; }
+    .builds-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .builds-hint { font-size: 12px; color: #666666; margin-bottom: 12px; }
+    .builds-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .build-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr auto;
+      gap: 8px;
+      align-items: end;
+      padding: 12px;
+      background: #141414;
+      border-radius: 8px;
+      border: 1px solid #2a2a2a;
+    }
+
+    .btn-add {
+      background: #1a1a0a;
+      color: #feff42;
+      border: 1px solid #3a3a1a;
+      border-radius: 6px;
+      padding: 6px 14px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .btn-add:hover { background: #2a2a1a; border-color: #feff42; }
+    .btn-remove {
+      background: #1a1a1a;
+      color: #888888;
+      border: 1px solid #333333;
+      border-radius: 6px;
+      padding: 8px 10px;
+      cursor: pointer;
+      font-size: 14px;
+      align-self: end;
+      height: fit-content;
+    }
+    .btn-remove:hover { color: #ff6666; border-color: #ff6666; }
+    .btn-remove:disabled { background: #111111; color: #444444; border-color: #222222; cursor: not-allowed; }
+
+    .results-box {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .results-box h2 { margin-top: 0; margin-bottom: 16px; }
+
+    .build-result {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      background: #1a1a1a;
+      border-radius: 6px;
+      margin-bottom: 4px;
+      font-size: 13px;
+    }
+    .build-result-name { color: #cccccc; }
+    .build-result-math { color: #999999; font-family: monospace; }
+    .build-result-math strong { color: #feff42; }
+
+    .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+    .stat-box {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 16px;
+      text-align: center;
+      flex: 1;
+      min-width: 140px;
+    }
+    .stat-label { font-size: 12px; color: #888888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 700; color: #feff42; }
+    .stat-sub { font-size: 12px; color: #666666; margin-top: 4px; }
+
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th { text-align: left; padding: 8px 12px; color: #888888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #2a2a2a; }
+    td { padding: 8px 12px; color: #cccccc; border-bottom: 1px solid #1a1a1a; }
+
+    .pool-info { font-size: 12px; color: #666666; margin-top: 8px; }
+
+    .title-row { display: flex; align-items: center; justify-content: space-between; }
+    .title-row h1 { margin: 0; }
+    .help-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #1a1a1a;
+      border: 1px solid #333333;
+      color: #888888;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .help-btn:hover { border-color: #feff42; color: #feff42; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 24px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h2 { margin-top: 0; margin-bottom: 16px; }
+    .modal p { font-size: 13px; color: #cccccc; line-height: 1.6; margin-bottom: 12px; }
+    .modal code {
+      background: #1a1a1a;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: monospace;
+      color: #feff42;
+    }
+    .modal-close {
+      float: right;
+      background: none;
+      border: none;
+      color: #888888;
+      font-size: 20px;
+      cursor: pointer;
+    }
+    .modal-close:hover { color: #ffffff; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="title-row">
+      <h1>Essence Farming Calculator</h1>
+      <button class="help-btn" onclick="toggleModal(true)">?</button>
+    </div>
+    <br>
+    <div class="zone-section">
+      <label>Energy Alluvium</label>
+      <select id="zoneSelect" onchange="onZoneChange()">
+        <option value="the-hub">The Hub</option>
+        <option value="originium-science-park">Originium Science Park</option>
+        <option value="origin-lodespring">Origin Lodespring</option>
+        <option value="power-plateau">Power Plateau</option>
+        <option value="wuling-city">Wuling City</option>
+      </select>
+      <div class="pool-info" id="poolInfo"></div>
+    </div>
+
+    <div class="config-grid">
+      <div>
+        <label>Essences / Run</label>
+        <input type="number" id="essencesPerRun" value="3" min="1">
+      </div>
+      <div>
+        <label>Sanity / Run</label>
+        <input type="number" id="sanityCost" value="80" min="1">
+      </div>
+    </div>
+
+    <div class="tickets-section">
+      <h2>Tickets</h2>
+      <p class="builds-hint">Uncheck all to use full pool (no ticket).</p>
+      <div class="tickets-grid-3">
+        <div class="multi-select">
+          <label>Attributes</label>
+          <div class="multi-select-btn" onclick="toggleDropdown('attrDropdown')">
+            <span id="attrSummary">All (5)</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="multi-select-dropdown" id="attrDropdown"></div>
+        </div>
+        <div class="multi-select">
+          <label>Secondaries</label>
+          <div class="multi-select-btn" onclick="toggleDropdown('secDropdown')">
+            <span id="secSummary">All (8)</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="multi-select-dropdown" id="secDropdown"></div>
+        </div>
+        <div class="multi-select">
+          <label>Skills</label>
+          <div class="multi-select-btn" onclick="toggleDropdown('skillDropdown')">
+            <span id="skillSummary">All (8)</span>
+            <span class="arrow">▼</span>
+          </div>
+          <div class="multi-select-dropdown" id="skillDropdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="builds-section">
+      <div class="builds-header">
+        <h2>Desired Essences</h2>
+        <button class="btn-add" onclick="addBuild()">+ Add Essence</button>
+      </div>
+      <p class="builds-hint">Add the essence combinations you're looking for.</p>
+      <div class="builds-list" id="buildsList"></div>
+    </div>
+
+    <div class="results-box">
+      <h2>Results</h2>
+      <div id="buildResults"></div>
+      <br>
+      <div class="stats-row" id="statsRow"></div>
+      <h3>Confidence Levels</h3>
+      <table>
+        <thead>
+          <tr><th>Confidence</th><th>Runs</th><th>Sanity</th><th>Regen Time</th></tr>
+        </thead>
+        <tbody id="confidenceTable"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    const ZONES = {
+      "the-hub": {
+        name: "The Hub",
+        skills: ["Assault", "Suppression", "Pursuit", "Crusher", "Combative", "Detonate", "Flow", "Efficacy"],
+        secondaries: ["Attack", "Heat DMG", "Electric DMG", "Cryo DMG", "Nature DMG", "Arts Intensity", "Ultimate Gain", "Arts DMG"]
+      },
+      "originium-science-park": {
+        name: "Originium Science Park",
+        skills: ["Suppression", "Pursuit", "Inspiring", "Combative", "Infliction", "Medicant", "Fracture", "Efficacy"],
+        secondaries: ["Attack", "Physical DMG", "Electric DMG", "Cryo DMG", "Nature DMG", "Critical Rate", "Ultimate Gain", "Arts DMG"]
+      },
+      "origin-lodespring": {
+        name: "Origin Lodespring",
+        skills: ["Assault", "Suppression", "Combative", "Brutality", "Infliction", "Detonate", "Twilight", "Efficacy"],
+        secondaries: ["HP", "Physical DMG", "Heat DMG", "Cryo DMG", "Nature DMG", "Critical Rate", "Arts Intensity", "Treatment Efficiency"]
+      },
+      "power-plateau": {
+        name: "Power Plateau",
+        skills: ["Pursuit", "Crusher", "Inspiring", "Brutality", "Infliction", "Medicant", "Fracture", "Flow"],
+        secondaries: ["Attack", "HP", "Physical DMG", "Heat DMG", "Nature DMG", "Critical Rate", "Arts Intensity", "Treatment Efficiency"]
+      },
+      "wuling-city": {
+        name: "Wuling City",
+        skills: ["Assault", "Crusher", "Brutality", "Medicant", "Fracture", "Detonate", "Twilight", "Flow"],
+        secondaries: ["Attack", "HP", "Electric DMG", "Cryo DMG", "Critical Rate", "Ultimate Gain", "Arts DMG", "Treatment Efficiency"]
+      }
+    };
+
+    const ATTRIBUTES = ["Agility", "Strength", "Will", "Intellect", "Main Attribute"];
+
+    const ATTR_POOL = 5;
+    const SEC_POOL = 8;
+    const SKILL_POOL = 8;
+
+    let currentZone = "the-hub";
+    let selectedAttrs = []; // empty = all (no ticket)
+    let selectedSecs = [];  // empty = all (no ticket)
+    let selectedSkills = []; // empty = all (no ticket)
+    let builds = [
+      { attribute: "Agility", secondary: "Attack", skill: "Flow" },
+    ];
+
+    function getVal(id) { return Math.max(1, parseInt(document.getElementById(id).value) || 1); }
+
+    function getZone() { return ZONES[currentZone]; }
+
+    function onZoneChange() {
+      currentZone = document.getElementById('zoneSelect').value;
+      const zone = getZone();
+      // Filter selected values to only those available in new zone
+      selectedSecs = selectedSecs.filter(s => zone.secondaries.includes(s));
+      selectedSkills = selectedSkills.filter(s => zone.skills.includes(s));
+      // Reset builds to valid options for new zone
+      builds = builds.map(b => ({
+        ...b,
+        skill: zone.skills.includes(b.skill) ? b.skill : zone.skills[0],
+        secondary: zone.secondaries.includes(b.secondary) ? b.secondary : zone.secondaries[0]
+      }));
+      renderMultiSelects();
+      renderBuilds();
+      calculate();
+    }
+
+    function renderPoolInfo() {
+      document.getElementById('poolInfo').innerHTML = `Pool sizes: ${SKILL_POOL} skills, ${ATTR_POOL} attributes, ${SEC_POOL} secondaries`;
+    }
+
+    function toggleDropdown(id) {
+      // Close all other dropdowns
+      document.querySelectorAll('.multi-select-dropdown').forEach(d => {
+        if (d.id !== id) d.classList.remove('open');
+      });
+      document.getElementById(id).classList.toggle('open');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.multi-select')) {
+        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('open'));
+      }
+    });
+
+    function renderMultiSelects() {
+      const zone = getZone();
+
+      // Attributes
+      document.getElementById('attrDropdown').innerHTML = ATTRIBUTES.map(a => `
+        <label><input type="checkbox" ${selectedAttrs.includes(a) ? 'checked' : ''} onchange="toggleAttr('${a}')"> ${a}</label>
+      `).join('');
+      updateSummary('attrSummary', selectedAttrs.length, ATTR_POOL);
+
+      // Secondaries
+      document.getElementById('secDropdown').innerHTML = zone.secondaries.map(s => `
+        <label><input type="checkbox" ${selectedSecs.includes(s) ? 'checked' : ''} onchange="toggleSec('${s}')"> ${s}</label>
+      `).join('');
+      updateSummary('secSummary', selectedSecs.length, zone.secondaries.length);
+
+      // Skills
+      document.getElementById('skillDropdown').innerHTML = zone.skills.map(s => `
+        <label><input type="checkbox" ${selectedSkills.includes(s) ? 'checked' : ''} onchange="toggleSkill('${s}')"> ${s}</label>
+      `).join('');
+      updateSummary('skillSummary', selectedSkills.length, zone.skills.length);
+    }
+
+    function updateSummary(id, selected, total) {
+      const el = document.getElementById(id);
+      if (selected === 0) {
+        el.textContent = `All (${total})`;
+      } else {
+        el.textContent = `${selected} selected`;
+      }
+    }
+
+    function toggleAttr(attr) {
+      if (selectedAttrs.includes(attr)) {
+        selectedAttrs = selectedAttrs.filter(a => a !== attr);
+      } else {
+        selectedAttrs.push(attr);
+      }
+      // Validate builds
+      if (selectedAttrs.length > 0) {
+        builds = builds.map(b => ({
+          ...b,
+          attribute: selectedAttrs.includes(b.attribute) ? b.attribute : selectedAttrs[0]
+        }));
+      }
+      renderMultiSelects();
+      renderBuilds();
+      calculate();
+    }
+
+    function toggleSec(sec) {
+      if (selectedSecs.includes(sec)) {
+        selectedSecs = selectedSecs.filter(s => s !== sec);
+      } else {
+        selectedSecs.push(sec);
+      }
+      // Validate builds
+      if (selectedSecs.length > 0) {
+        builds = builds.map(b => ({
+          ...b,
+          secondary: selectedSecs.includes(b.secondary) ? b.secondary : selectedSecs[0]
+        }));
+      }
+      renderMultiSelects();
+      renderBuilds();
+      calculate();
+    }
+
+    function toggleSkill(skill) {
+      if (selectedSkills.includes(skill)) {
+        selectedSkills = selectedSkills.filter(s => s !== skill);
+      } else {
+        selectedSkills.push(skill);
+      }
+      // Validate builds
+      if (selectedSkills.length > 0) {
+        builds = builds.map(b => ({
+          ...b,
+          skill: selectedSkills.includes(b.skill) ? b.skill : selectedSkills[0]
+        }));
+      }
+      renderMultiSelects();
+      renderBuilds();
+      calculate();
+    }
+
+    function renderBuilds() {
+      const zone = getZone();
+      const list = document.getElementById('buildsList');
+
+      // Use selected pools if any, otherwise full pools
+      const attrOptions = selectedAttrs.length > 0 ? selectedAttrs : ATTRIBUTES;
+      const secOptions = selectedSecs.length > 0 ? selectedSecs : zone.secondaries;
+      const skillOptions = selectedSkills.length > 0 ? selectedSkills : zone.skills;
+
+      list.innerHTML = builds.map((b, i) => `
+        <div class="build-row">
+          <div>
+            <label>Attribute</label>
+            <select onchange="updateBuild(${i}, 'attribute', this.value)">
+              ${attrOptions.map(a => `<option value="${a}" ${b.attribute === a ? 'selected' : ''}>${a}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Secondary</label>
+            <select onchange="updateBuild(${i}, 'secondary', this.value)">
+              ${secOptions.map(s => `<option value="${s}" ${b.secondary === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <div>
+            <label>Skill</label>
+            <select onchange="updateBuild(${i}, 'skill', this.value)">
+              ${skillOptions.map(s => `<option value="${s}" ${b.skill === s ? 'selected' : ''}>${s}</option>`).join('')}
+            </select>
+          </div>
+          <button class="btn-remove" onclick="removeBuild(${i})" ${builds.length <= 1 ? 'disabled' : ''}>✕</button>
+        </div>
+      `).join('');
+    }
+
+    function updateBuild(i, field, value) {
+      builds[i][field] = value;
+      calculate();
+    }
+
+    function addBuild() {
+      const zone = getZone();
+      const attrOptions = selectedAttrs.length > 0 ? selectedAttrs : ATTRIBUTES;
+      const secOptions = selectedSecs.length > 0 ? selectedSecs : zone.secondaries;
+      const skillOptions = selectedSkills.length > 0 ? selectedSkills : zone.skills;
+      builds.push({
+        attribute: attrOptions[0],
+        secondary: secOptions[0],
+        skill: skillOptions[0]
+      });
+      renderBuilds();
+      calculate();
+    }
+
+    function removeBuild(i) {
+      if (builds.length > 1) {
+        builds.splice(i, 1);
+        renderBuilds();
+        calculate();
+      }
+    }
+
+    function calculate() {
+      const zone = getZone();
+      const essencesPerRun = getVal('essencesPerRun');
+      const sanityCost = getVal('sanityCost');
+
+      // Pool sizes: use selected count if any selected, otherwise full pool
+      const attrPoolSize = selectedAttrs.length > 0 ? selectedAttrs.length : ATTR_POOL;
+      const secPoolSize = selectedSecs.length > 0 ? selectedSecs.length : SEC_POOL;
+      const skillPoolSize = selectedSkills.length > 0 ? selectedSkills.length : SKILL_POOL;
+
+      let totalP = 0;
+      const buildResults = builds.map(b => {
+        const pA = 1 / attrPoolSize;
+        const pS = 1 / secPoolSize;
+        const pK = 1 / skillPoolSize;
+
+        const p = pA * pS * pK;
+        totalP += p;
+
+        return { ...b, pA, pS, pK, p, attrPoolSize, secPoolSize, skillPoolSize };
+      });
+
+      const pMiss = 1 - totalP;
+      const pRunMiss = Math.pow(pMiss, essencesPerRun);
+      const pRunHit = 1 - pRunMiss;
+
+      const avgRuns = pRunHit > 0 ? 1 / pRunHit : Infinity;
+      const avgSanity = avgRuns * sanityCost;
+      const avgRegenDays = (avgSanity * 432) / 86400;
+
+      // Helper to format as fraction
+      const frac = (poolSize) => poolSize === 1 ? '1' : `1/${poolSize}`;
+
+      // Render build results
+      document.getElementById('buildResults').innerHTML = buildResults.map(b => `
+        <div class="build-result">
+          <span class="build-result-name">${b.attribute} + ${b.secondary} + ${b.skill}</span>
+          <span class="build-result-math">
+            ${frac(b.attrPoolSize)} × ${frac(b.secPoolSize)} × ${frac(b.skillPoolSize)} = <strong>1/${Math.round(1/b.p)}</strong> (${(b.p * 100).toFixed(2)}%)
+          </span>
+        </div>
+      `).join('');
+
+      // Render stats
+      document.getElementById('statsRow').innerHTML = `
+        <div class="stat-box">
+          <div class="stat-label">Per Essence</div>
+          <div class="stat-value">${(totalP * 100).toFixed(2)}%</div>
+          <div class="stat-sub">1 in ${Math.round(1/totalP)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Per Run</div>
+          <div class="stat-value">${(pRunHit * 100).toFixed(1)}%</div>
+          <div class="stat-sub">1 in ${avgRuns.toFixed(1)}</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-label">Avg Sanity</div>
+          <div class="stat-value">${Math.round(avgSanity).toLocaleString()}</div>
+          <div class="stat-sub">${avgRegenDays.toFixed(1)} days regen</div>
+        </div>
+      `;
+
+      // Render confidence table
+      const confidenceLevels = [0.5, 0.75, 0.9, 0.95, 0.99];
+      document.getElementById('confidenceTable').innerHTML = confidenceLevels.map(c => {
+        if (pRunHit <= 0) return `<tr><td>${c*100}%</td><td>∞</td><td>∞</td><td>∞</td></tr>`;
+        const runs = Math.ceil(Math.log(1 - c) / Math.log(pRunMiss));
+        const sanity = runs * sanityCost;
+        const days = (sanity * 432) / 86400;
+        return `<tr><td>${c*100}%</td><td>${runs}</td><td>${sanity.toLocaleString()}</td><td>~${days.toFixed(1)} days</td></tr>`;
+      }).join('');
+    }
+
+    // Initialize
+    renderPoolInfo();
+    renderMultiSelects();
+    renderBuilds();
+    calculate();
+
+    // Recalculate on input changes
+    document.querySelectorAll('.config-grid input').forEach(input => {
+      input.addEventListener('input', calculate);
+    });
+
+    // Modal
+    function toggleModal(open) {
+      document.getElementById('helpModal').classList.toggle('open', open);
+    }
+  </script>
+
+  <div class="modal-overlay" id="helpModal" onclick="toggleModal(false)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <button class="modal-close" onclick="toggleModal(false)">&times;</button>
+      <h2>Math</h2>
+      <p><strong>Per-Essence Probability</strong></p>
+      <p>Each essence rolls independently for attribute, secondary, and skill:</p>
+      <p><code>P_essence = (1/attr_pool) × (1/sec_pool) × (1/skill_pool)</code></p>
+      <p>If you have multiple desired essences, their probabilities add up because each roll can only match one target at a time—these are mutually exclusive outcomes.</p>
+
+      <p><strong>Per-Run Probability</strong></p>
+      <p>Each run gives you multiple essences. The chance of getting at least one match:</p>
+      <p><code>P_run = 1 − (1 − P_essence)^essences_per_run</code></p>
+
+      <p><strong>Confidence Levels</strong></p>
+      <p>How many runs to reach X% confidence of getting at least one match:</p>
+      <p><code>Runs = ⌈ln(1 − confidence) / ln(1 − P_run)⌉</code></p>
+
+      <p><strong>Sanity Regen</strong></p>
+      <p>1 sanity regenerates every 7 minutes and 12 seconds (432 seconds).</p>
+    </div>
+  </div>
+</body>
+</html>
