@@ -16,8 +16,7 @@
     }
     .container { max-width: 800px; margin: 0 auto; }
     h1 { font-size: 22px; font-weight: 700; color: #feff42; margin-bottom: 4px; letter-spacing: 0.5px; }
-    .subtitle { font-size: 13px; color: #666666; margin-bottom: 24px; }
-    h2 { font-size: 16px; color: #feff42; margin: 0; }
+    h2 { font-size: 16px; color: #ffffff; margin: 0; }
     h3 { font-size: 14px; color: #999999; margin-bottom: 10px; }
 
     label { font-size: 11px; color: #888888; text-transform: uppercase; letter-spacing: 1px; display: block; }
@@ -35,15 +34,6 @@
       outline: none;
       border-color: #feff42;
     }
-    .checkbox-label {
-      font-size: 12px;
-      color: #999999;
-      display: flex;
-      align-items: center;
-      margin-top: 4px;
-      cursor: pointer;
-    }
-    .checkbox-label span { margin-left: 4px; }
 
     .config-grid {
       display: flex;
@@ -69,70 +59,6 @@
       -webkit-appearance: none;
       margin: 0;
     }
-
-    .config-grid select {
-      width: auto;
-      min-width: 120px;
-      margin: 0;
-    }
-
-    .tickets-section {
-      margin-bottom: 20px;
-      background: #141414;
-      border: 1px solid #2a2a2a;
-      border-radius: 10px;
-      padding: 16px;
-    }
-    .tickets-section h2 { margin-top: 0; margin-bottom: 8px; }
-    .tickets-grid-3 {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 12px;
-      margin-top: 8px;
-    }
-    .multi-select { position: relative; }
-    .multi-select-btn {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      background: #111111;
-      border: 1px solid #333333;
-      border-radius: 6px;
-      color: #e0e0e0;
-      font-size: 14px;
-      margin-top: 4px;
-      cursor: pointer;
-    }
-    .multi-select-btn:hover { border-color: #feff42; }
-    .multi-select-btn .arrow { font-size: 10px; color: #888888; }
-    .multi-select-dropdown {
-      display: none;
-      position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
-      background: #111111;
-      border: 1px solid #333333;
-      border-radius: 6px;
-      margin-top: 4px;
-      max-height: 200px;
-      overflow-y: auto;
-      z-index: 100;
-    }
-    .multi-select-dropdown.open { display: block; }
-    .multi-select-dropdown label {
-      display: flex;
-      align-items: center;
-      padding: 8px 12px;
-      cursor: pointer;
-      font-size: 13px;
-      text-transform: none;
-      letter-spacing: 0;
-      color: #cccccc;
-    }
-    .multi-select-dropdown label:hover { background: #1a1a1a; }
-    .multi-select-dropdown input { margin-right: 8px; accent-color: #feff42; }
 
     .builds-section { margin-bottom: 20px; }
     .builds-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
@@ -183,19 +109,72 @@
     }
     .results-box h2 { margin-top: 0; margin-bottom: 16px; }
 
-    .build-result {
+    /* Step 1: Zone selection */
+    .zone-list { display: flex; flex-direction: column; gap: 6px; }
+    .zone-item {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 8px 12px;
+      padding: 12px;
       background: #1a1a1a;
+      border: 1px solid #2a2a2a;
       border-radius: 6px;
-      margin-bottom: 4px;
-      font-size: 13px;
+      cursor: pointer;
+      transition: border-color 0.15s;
     }
-    .build-result-name { color: #cccccc; }
-    .build-result-math { color: #999999; font-family: monospace; }
-    .build-result-math strong { color: #feff42; }
+    .zone-item:hover { border-color: #444444; }
+    .zone-item.selected { border-color: #feff42; background: #1a1a10; }
+    .zone-item.invalid { opacity: 0.4; cursor: not-allowed; }
+    .zone-item-name { color: #cccccc; font-size: 14px; }
+    .zone-item-status { font-size: 12px; color: #888888; }
+    .zone-item.invalid .zone-item-status { color: #666666; }
+    .zone-item.selected .zone-item-name { color: #feff42; }
+
+    /* Step 2: Zone details */
+    .zone-details {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #2a2a2a;
+    }
+    .zone-details h3 { color: #ffffff; margin-top: 0; }
+
+    .ticket-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+    .ticket-header {
+      display: flex;
+      justify-content: space-between;
+      padding: 0 12px 4px;
+      font-size: 11px;
+      color: #666666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .ticket-header span:first-child {
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 700;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+    .ticket-option {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .ticket-option:hover { border-color: #444444; }
+    .ticket-option.selected { border-color: #feff42; background: #1a1a10; }
+    .ticket-option-name { color: #cccccc; font-size: 13px; }
+    .ticket-option-prob { font-size: 13px; font-family: monospace; color: #feff42; }
+    .prob-calc { color: #888888; }
 
     .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
     .stat-box {
@@ -214,7 +193,6 @@
     table { width: 100%; border-collapse: collapse; font-size: 13px; }
     th { text-align: left; padding: 8px 12px; color: #888888; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #2a2a2a; }
     td { padding: 8px 12px; color: #cccccc; border-bottom: 1px solid #1a1a1a; }
-
 
     .title-row { display: flex; align-items: center; justify-content: space-between; }
     .title-row h1 { margin: 0; }
@@ -275,6 +253,8 @@
       cursor: pointer;
     }
     .modal-close:hover { color: #ffffff; }
+
+    .no-zones-msg { color: #ff6666; font-size: 13px; padding: 12px; background: #1a1a1a; border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -286,16 +266,6 @@
     <br>
     <div class="config-grid">
       <div>
-        <label>Energy Alluvium</label>
-        <select id="zoneSelect" onchange="onZoneChange()">
-          <option value="the-hub">The Hub</option>
-          <option value="originium-science-park">Originium Science Park</option>
-          <option value="origin-lodespring">Origin Lodespring</option>
-          <option value="power-plateau">Power Plateau</option>
-          <option value="wuling-city">Wuling City</option>
-        </select>
-      </div>
-      <div>
         <label>Essences / Run</label>
         <input type="number" id="essencesPerRun" value="3" min="1">
       </div>
@@ -305,58 +275,18 @@
       </div>
     </div>
 
-    <div class="tickets-section">
-      <h2>Tickets</h2>
-      <p class="builds-hint">Uncheck all to use full pool (no ticket).</p>
-      <div class="tickets-grid-3">
-        <div class="multi-select">
-          <label>Attributes</label>
-          <div class="multi-select-btn" onclick="toggleDropdown('attrDropdown')">
-            <span id="attrSummary">All (5)</span>
-            <span class="arrow">▼</span>
-          </div>
-          <div class="multi-select-dropdown" id="attrDropdown"></div>
-        </div>
-        <div class="multi-select">
-          <label>Secondaries</label>
-          <div class="multi-select-btn" onclick="toggleDropdown('secDropdown')">
-            <span id="secSummary">All (8)</span>
-            <span class="arrow">▼</span>
-          </div>
-          <div class="multi-select-dropdown" id="secDropdown"></div>
-        </div>
-        <div class="multi-select">
-          <label>Skills</label>
-          <div class="multi-select-btn" onclick="toggleDropdown('skillDropdown')">
-            <span id="skillSummary">All (8)</span>
-            <span class="arrow">▼</span>
-          </div>
-          <div class="multi-select-dropdown" id="skillDropdown"></div>
-        </div>
-      </div>
-    </div>
-
     <div class="builds-section">
       <div class="builds-header">
         <h2>Desired Essences</h2>
         <button class="btn-add" onclick="addBuild()">+ Add Essence</button>
       </div>
-      <p class="builds-hint">Add the essence combinations you're looking for.</p>
       <div class="builds-list" id="buildsList"></div>
     </div>
 
     <div class="results-box">
-      <h2>Results</h2>
-      <div id="buildResults"></div>
-      <br>
-      <div class="stats-row" id="statsRow"></div>
-      <h3>Confidence Levels</h3>
-      <table>
-        <thead>
-          <tr><th>Confidence</th><th>Runs</th><th>Sanity</th><th>Regen Time</th></tr>
-        </thead>
-        <tbody id="confidenceTable"></tbody>
-      </table>
+      <h2>Energy Alluvium</h2>
+      <div class="zone-list" id="zoneList"></div>
+      <div class="zone-details" id="zoneDetails" style="display: none;"></div>
     </div>
   </div>
 
@@ -390,167 +320,40 @@
     };
 
     const ATTRIBUTES = ["Agility", "Strength", "Will", "Intellect", "Main Attribute"];
+    const ALL_SECONDARIES = [...new Set(Object.values(ZONES).flatMap(z => z.secondaries))].sort();
+    const ALL_SKILLS = [...new Set(Object.values(ZONES).flatMap(z => z.skills))].sort();
 
     const ATTR_POOL = 5;
-    const SEC_POOL = 8;
-    const SKILL_POOL = 8;
+    const ATTR_TICKET_POOL = 3;
 
-    let currentZone = "the-hub";
-    let selectedAttrs = []; // empty = all (no ticket)
-    let selectedSecs = [];  // empty = all (no ticket)
-    let selectedSkills = []; // empty = all (no ticket)
     let builds = [
       { attribute: "Agility", secondary: "Attack", skill: "Flow" },
     ];
+    let selectedZone = null;
+    let selectedTicket = "none"; // "none", "secondary", "skill"
 
     function getVal(id) { return Math.max(1, parseInt(document.getElementById(id).value) || 1); }
 
-    function getZone() { return ZONES[currentZone]; }
-
-    function onZoneChange() {
-      currentZone = document.getElementById('zoneSelect').value;
-      const zone = getZone();
-      // Filter selected values to only those available in new zone
-      selectedSecs = selectedSecs.filter(s => zone.secondaries.includes(s));
-      selectedSkills = selectedSkills.filter(s => zone.skills.includes(s));
-      // Reset builds to valid options for new zone
-      builds = builds.map(b => ({
-        ...b,
-        skill: zone.skills.includes(b.skill) ? b.skill : zone.skills[0],
-        secondary: zone.secondaries.includes(b.secondary) ? b.secondary : zone.secondaries[0]
-      }));
-      renderMultiSelects();
-      renderBuilds();
-      calculate();
-    }
-
-    function toggleDropdown(id) {
-      // Close all other dropdowns
-      document.querySelectorAll('.multi-select-dropdown').forEach(d => {
-        if (d.id !== id) d.classList.remove('open');
-      });
-      document.getElementById(id).classList.toggle('open');
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!e.target.closest('.multi-select')) {
-        document.querySelectorAll('.multi-select-dropdown').forEach(d => d.classList.remove('open'));
-      }
-    });
-
-    function renderMultiSelects() {
-      const zone = getZone();
-
-      // Attributes
-      document.getElementById('attrDropdown').innerHTML = ATTRIBUTES.map(a => `
-        <label><input type="checkbox" ${selectedAttrs.includes(a) ? 'checked' : ''} onchange="toggleAttr('${a}')"> ${a}</label>
-      `).join('');
-      updateSummary('attrSummary', selectedAttrs.length, ATTR_POOL);
-
-      // Secondaries
-      document.getElementById('secDropdown').innerHTML = zone.secondaries.map(s => `
-        <label><input type="checkbox" ${selectedSecs.includes(s) ? 'checked' : ''} onchange="toggleSec('${s}')"> ${s}</label>
-      `).join('');
-      updateSummary('secSummary', selectedSecs.length, zone.secondaries.length);
-
-      // Skills
-      document.getElementById('skillDropdown').innerHTML = zone.skills.map(s => `
-        <label><input type="checkbox" ${selectedSkills.includes(s) ? 'checked' : ''} onchange="toggleSkill('${s}')"> ${s}</label>
-      `).join('');
-      updateSummary('skillSummary', selectedSkills.length, zone.skills.length);
-    }
-
-    function updateSummary(id, selected, total) {
-      const el = document.getElementById(id);
-      if (selected === 0) {
-        el.textContent = `All (${total})`;
-      } else {
-        el.textContent = `${selected} selected`;
-      }
-    }
-
-    function toggleAttr(attr) {
-      if (selectedAttrs.includes(attr)) {
-        selectedAttrs = selectedAttrs.filter(a => a !== attr);
-      } else {
-        selectedAttrs.push(attr);
-      }
-      // Validate builds
-      if (selectedAttrs.length > 0) {
-        builds = builds.map(b => ({
-          ...b,
-          attribute: selectedAttrs.includes(b.attribute) ? b.attribute : selectedAttrs[0]
-        }));
-      }
-      renderMultiSelects();
-      renderBuilds();
-      calculate();
-    }
-
-    function toggleSec(sec) {
-      if (selectedSecs.includes(sec)) {
-        selectedSecs = selectedSecs.filter(s => s !== sec);
-      } else {
-        selectedSecs.push(sec);
-      }
-      // Validate builds
-      if (selectedSecs.length > 0) {
-        builds = builds.map(b => ({
-          ...b,
-          secondary: selectedSecs.includes(b.secondary) ? b.secondary : selectedSecs[0]
-        }));
-      }
-      renderMultiSelects();
-      renderBuilds();
-      calculate();
-    }
-
-    function toggleSkill(skill) {
-      if (selectedSkills.includes(skill)) {
-        selectedSkills = selectedSkills.filter(s => s !== skill);
-      } else {
-        selectedSkills.push(skill);
-      }
-      // Validate builds
-      if (selectedSkills.length > 0) {
-        builds = builds.map(b => ({
-          ...b,
-          skill: selectedSkills.includes(b.skill) ? b.skill : selectedSkills[0]
-        }));
-      }
-      renderMultiSelects();
-      renderBuilds();
-      calculate();
-    }
-
     function renderBuilds() {
-      const zone = getZone();
       const list = document.getElementById('buildsList');
-
-      // Use selected pools if any, otherwise full pools
-      const attrOptions = selectedAttrs.length > 0 ? selectedAttrs : ATTRIBUTES;
-      const secOptions = selectedSecs.length > 0 ? selectedSecs : zone.secondaries;
-      const skillOptions = selectedSkills.length > 0 ? selectedSkills : zone.skills;
-
       list.innerHTML = builds.map((b, i) => `
         <div class="build-row">
           <div>
             <label>Attribute</label>
             <select onchange="updateBuild(${i}, 'attribute', this.value)">
-              ${attrOptions.map(a => `<option value="${a}" ${b.attribute === a ? 'selected' : ''}>${a}</option>`).join('')}
+              ${ATTRIBUTES.map(a => `<option value="${a}" ${b.attribute === a ? 'selected' : ''}>${a}</option>`).join('')}
             </select>
           </div>
           <div>
             <label>Secondary</label>
             <select onchange="updateBuild(${i}, 'secondary', this.value)">
-              ${secOptions.map(s => `<option value="${s}" ${b.secondary === s ? 'selected' : ''}>${s}</option>`).join('')}
+              ${ALL_SECONDARIES.map(s => `<option value="${s}" ${b.secondary === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
           </div>
           <div>
             <label>Skill</label>
             <select onchange="updateBuild(${i}, 'skill', this.value)">
-              ${skillOptions.map(s => `<option value="${s}" ${b.skill === s ? 'selected' : ''}>${s}</option>`).join('')}
+              ${ALL_SKILLS.map(s => `<option value="${s}" ${b.skill === s ? 'selected' : ''}>${s}</option>`).join('')}
             </select>
           </div>
           <button class="btn-remove" onclick="removeBuild(${i})" ${builds.length <= 1 ? 'disabled' : ''}>✕</button>
@@ -560,19 +363,17 @@
 
     function updateBuild(i, field, value) {
       builds[i][field] = value;
+      selectedZone = null;
       calculate();
     }
 
     function addBuild() {
-      const zone = getZone();
-      const attrOptions = selectedAttrs.length > 0 ? selectedAttrs : ATTRIBUTES;
-      const secOptions = selectedSecs.length > 0 ? selectedSecs : zone.secondaries;
-      const skillOptions = selectedSkills.length > 0 ? selectedSkills : zone.skills;
       builds.push({
-        attribute: attrOptions[0],
-        secondary: secOptions[0],
-        skill: skillOptions[0]
+        attribute: ATTRIBUTES[0],
+        secondary: ALL_SECONDARIES[0],
+        skill: ALL_SKILLS[0]
       });
+      selectedZone = null;
       renderBuilds();
       calculate();
     }
@@ -580,90 +381,202 @@
     function removeBuild(i) {
       if (builds.length > 1) {
         builds.splice(i, 1);
+        selectedZone = null;
         renderBuilds();
         calculate();
       }
     }
 
+    function selectZone(zoneId) {
+      if (!zoneId) return;
+      const zone = ZONES[zoneId];
+      const requiredSecs = new Set(builds.map(b => b.secondary));
+      const requiredSkills = new Set(builds.map(b => b.skill));
+      const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));
+      const hasAllSkills = [...requiredSkills].every(s => zone.skills.includes(s));
+      if (!hasAllSecs || !hasAllSkills) return;
+
+      selectedZone = zoneId;
+      selectedTicket = "none";
+      calculate();
+    }
+
+    function selectTicket(ticket) {
+      selectedTicket = ticket;
+      calculate();
+    }
+
     function calculate() {
-      const zone = getZone();
       const essencesPerRun = getVal('essencesPerRun');
       const sanityCost = getVal('sanityCost');
 
-      // Pool sizes: use selected count if any selected, otherwise full pool
-      const attrPoolSize = selectedAttrs.length > 0 ? selectedAttrs.length : ATTR_POOL;
-      const secPoolSize = selectedSecs.length > 0 ? selectedSecs.length : SEC_POOL;
-      const skillPoolSize = selectedSkills.length > 0 ? selectedSkills.length : SKILL_POOL;
+      // Calculate zone validity
+      const zoneResults = [];
+      for (const [zoneId, zone] of Object.entries(ZONES)) {
+        const requiredSecs = new Set(builds.map(b => b.secondary));
+        const requiredSkills = new Set(builds.map(b => b.skill));
+        const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));
+        const hasAllSkills = [...requiredSkills].every(s => zone.skills.includes(s));
+        zoneResults.push({ zoneId, zone, isValid: hasAllSecs && hasAllSkills });
+      }
 
-      let totalP = 0;
-      const buildResults = builds.map(b => {
-        const pA = 1 / attrPoolSize;
-        const pS = 1 / secPoolSize;
-        const pK = 1 / skillPoolSize;
+      // Render zone list
+      document.getElementById('zoneList').innerHTML = zoneResults.map(r => `
+        <div class="zone-item ${r.isValid ? '' : 'invalid'} ${selectedZone === r.zoneId ? 'selected' : ''}"
+             onclick="${r.isValid ? `selectZone('${r.zoneId}')` : ''}">
+          <span class="zone-item-name">${r.zone.name}</span>
+          <span class="zone-item-status">${r.isValid ? 'Available' : 'Missing stats'}</span>
+        </div>
+      `).join('');
 
-        const p = pA * pS * pK;
-        totalP += p;
+      // Render zone details if selected
+      const detailsEl = document.getElementById('zoneDetails');
+      if (!selectedZone) {
+        detailsEl.style.display = 'none';
+        return;
+      }
 
-        return { ...b, pA, pS, pK, p, attrPoolSize, secPoolSize, skillPoolSize };
-      });
+      detailsEl.style.display = 'block';
+      const zone = ZONES[selectedZone];
 
-      const pMiss = 1 - totalP;
+      // Calculate probabilities for each ticket option
+      const secPool = zone.secondaries.length;
+      const skillPool = zone.skills.length;
+
+      // Find optimal ticket configuration
+      // For each ticket type, we need to find:
+      // 1. Best secondary/skill to lock (most common)
+      // 2. Best 3 attributes to lock (among essences that have that secondary/skill)
+
+      function findBestTicketConfig(builds, statKey) {
+        // Group builds by the stat (secondary or skill)
+        const statGroups = {};
+        builds.forEach(b => {
+          const stat = b[statKey];
+          if (!statGroups[stat]) statGroups[stat] = [];
+          statGroups[stat].push(b);
+        });
+
+        // For each stat value, find the best 3 attributes
+        let bestConfig = { stats: [], attrs: [], count: 0 };
+
+        for (const [stat, group] of Object.entries(statGroups)) {
+          // Count attributes in this group
+          const attrCounts = {};
+          group.forEach(b => {
+            attrCounts[b.attribute] = (attrCounts[b.attribute] || 0) + 1;
+          });
+
+          // Get top 3 attributes by count
+          const sortedAttrs = Object.entries(attrCounts)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 3)
+            .map(([attr]) => attr);
+
+          // Count how many essences benefit (have this stat AND one of top 3 attrs)
+          const benefitCount = group.filter(b => sortedAttrs.includes(b.attribute)).length;
+
+          if (benefitCount > bestConfig.count) {
+            bestConfig = { stats: [stat], attrs: sortedAttrs, count: benefitCount };
+          } else if (benefitCount === bestConfig.count && benefitCount > 0) {
+            // Multiple stats give same benefit - show all
+            if (!bestConfig.stats.includes(stat)) {
+              bestConfig.stats.push(stat);
+            }
+          }
+        }
+
+        return bestConfig;
+      }
+
+      const secConfig = findBestTicketConfig(builds, 'secondary');
+      const skillConfig = findBestTicketConfig(builds, 'skill');
+
+      const probNoTicket = builds.length * (1 / ATTR_POOL) * (1 / secPool) * (1 / skillPool);
+      // Secondary ticket: only essences with best secondary AND valid attribute benefit
+      const probSecTicket = secConfig.count * (1 / ATTR_TICKET_POOL) * 1 * (1 / skillPool);
+      // Skill ticket: only essences with best skill AND valid attribute benefit
+      const probSkillTicket = skillConfig.count * (1 / ATTR_TICKET_POOL) * (1 / secPool) * 1;
+
+      // Get current probability based on selection
+      let currentP;
+      if (selectedTicket === "secondary") {
+        currentP = probSecTicket;
+      } else if (selectedTicket === "skill") {
+        currentP = probSkillTicket;
+      } else {
+        currentP = probNoTicket;
+      }
+
+      const pMiss = 1 - currentP;
       const pRunMiss = Math.pow(pMiss, essencesPerRun);
       const pRunHit = 1 - pRunMiss;
-
       const avgRuns = pRunHit > 0 ? 1 / pRunHit : Infinity;
       const avgSanity = avgRuns * sanityCost;
       const avgRegenDays = (avgSanity * 432) / 86400;
 
-      // Helper to format as fraction
-      const frac = (poolSize) => poolSize === 1 ? '1' : `1/${poolSize}`;
+      const frac = (n) => n === 1 ? '1' : `1/${n}`;
 
-      // Render build results
-      document.getElementById('buildResults').innerHTML = buildResults.map(b => `
-        <div class="build-result">
-          <span class="build-result-name">${b.attribute} + ${b.secondary} + ${b.skill}</span>
-          <span class="build-result-math">
-            ${frac(b.attrPoolSize)} × ${frac(b.secPoolSize)} × ${frac(b.skillPoolSize)} = <strong>1/${Math.round(1/b.p)}</strong> (${(b.p * 100).toFixed(2)}%)
-          </span>
+      detailsEl.innerHTML = `
+        <div class="ticket-options">
+          <div class="ticket-header">
+            <span>${zone.name}</span>
+            <span>Per Essence</span>
+          </div>
+          <div class="ticket-option ${selectedTicket === 'none' ? 'selected' : ''}" onclick="selectTicket('none')">
+            <span class="ticket-option-name">No ticket</span>
+            <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_POOL)} × ${frac(secPool)} × ${frac(skillPool)} =</span> ${(probNoTicket * 100).toFixed(2)}%</span>
+          </div>
+          <div class="ticket-option ${selectedTicket === 'secondary' ? 'selected' : ''}" onclick="selectTicket('secondary')">
+            <span class="ticket-option-name">Lock ${secConfig.stats.join('/')} (${secConfig.count}/${builds.length} essences)</span>
+            <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × 1 × ${frac(skillPool)} =</span> ${(probSecTicket * 100).toFixed(2)}%</span>
+          </div>
+          <div class="ticket-option ${selectedTicket === 'skill' ? 'selected' : ''}" onclick="selectTicket('skill')">
+            <span class="ticket-option-name">Lock ${skillConfig.stats.join('/')} (${skillConfig.count}/${builds.length} essences)</span>
+            <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × ${frac(secPool)} × 1 =</span> ${(probSkillTicket * 100).toFixed(2)}%</span>
+          </div>
         </div>
-      `).join('');
 
-      // Render stats
-      document.getElementById('statsRow').innerHTML = `
-        <div class="stat-box">
-          <div class="stat-label">Per Essence</div>
-          <div class="stat-value">${(totalP * 100).toFixed(2)}%</div>
-          <div class="stat-sub">1 in ${Math.round(1/totalP)}</div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-label">Per Essence</div>
+            <div class="stat-value">${(currentP * 100).toFixed(2)}%</div>
+            <div class="stat-sub">1 in ${Math.round(1/currentP)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Per Run</div>
+            <div class="stat-value">${(pRunHit * 100).toFixed(1)}%</div>
+            <div class="stat-sub">1 in ${avgRuns.toFixed(1)}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-label">Avg Sanity</div>
+            <div class="stat-value">${Math.round(avgSanity).toLocaleString()}</div>
+            <div class="stat-sub">${avgRegenDays.toFixed(1)} days regen</div>
+          </div>
         </div>
-        <div class="stat-box">
-          <div class="stat-label">Per Run</div>
-          <div class="stat-value">${(pRunHit * 100).toFixed(1)}%</div>
-          <div class="stat-sub">1 in ${avgRuns.toFixed(1)}</div>
-        </div>
-        <div class="stat-box">
-          <div class="stat-label">Avg Sanity</div>
-          <div class="stat-value">${Math.round(avgSanity).toLocaleString()}</div>
-          <div class="stat-sub">${avgRegenDays.toFixed(1)} days regen</div>
-        </div>
+
+        <h3>Confidence Levels</h3>
+        <table>
+          <thead>
+            <tr><th>Confidence</th><th>Runs</th><th>Sanity</th><th>Regen Time</th></tr>
+          </thead>
+          <tbody>
+            ${[0.5, 0.75, 0.9, 0.95, 0.99].map(c => {
+              if (pRunHit <= 0) return `<tr><td>${c*100}%</td><td>∞</td><td>∞</td><td>∞</td></tr>`;
+              const runs = Math.ceil(Math.log(1 - c) / Math.log(pRunMiss));
+              const sanity = runs * sanityCost;
+              const days = (sanity * 432) / 86400;
+              return `<tr><td>${c*100}%</td><td>${runs}</td><td>${sanity.toLocaleString()}</td><td>~${days.toFixed(1)} days</td></tr>`;
+            }).join('')}
+          </tbody>
+        </table>
       `;
-
-      // Render confidence table
-      const confidenceLevels = [0.5, 0.75, 0.9, 0.95, 0.99];
-      document.getElementById('confidenceTable').innerHTML = confidenceLevels.map(c => {
-        if (pRunHit <= 0) return `<tr><td>${c*100}%</td><td>∞</td><td>∞</td><td>∞</td></tr>`;
-        const runs = Math.ceil(Math.log(1 - c) / Math.log(pRunMiss));
-        const sanity = runs * sanityCost;
-        const days = (sanity * 432) / 86400;
-        return `<tr><td>${c*100}%</td><td>${runs}</td><td>${sanity.toLocaleString()}</td><td>~${days.toFixed(1)} days</td></tr>`;
-      }).join('');
     }
 
     // Initialize
-    renderMultiSelects();
     renderBuilds();
     calculate();
 
-    // Recalculate on input changes
     document.querySelectorAll('.config-grid input').forEach(input => {
       input.addEventListener('input', calculate);
     });
