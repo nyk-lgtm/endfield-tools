@@ -255,6 +255,85 @@
     .modal-close:hover { color: #ffffff; }
 
     .no-zones-msg { color: #ff6666; font-size: 13px; padding: 12px; background: #1a1a1a; border-radius: 6px; }
+
+    .mode-toggle {
+      display: flex;
+      gap: 0;
+      margin-bottom: 20px;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      color: #888888;
+      font-size: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .mode-btn:first-child { border-radius: 6px 0 0 6px; }
+    .mode-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+    .mode-btn.active {
+      background: #1a1a10;
+      border-color: #feff42;
+      color: #feff42;
+      border-left: 1px solid #feff42;
+    }
+    .mode-btn:not(.active):hover { border-color: #444444; color: #cccccc; }
+
+    .plan-zone {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 12px;
+      padding: 20px;
+      margin-bottom: 16px;
+    }
+    .plan-zone-name {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .plan-configs {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .plan-config {
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      padding: 14px;
+    }
+    .plan-config-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .plan-config-ticket { color: #feff42; font-size: 13px; font-weight: 600; }
+    .plan-config-prob { color: #888888; font-size: 12px; }
+    .plan-config-prob span { color: #feff42; }
+    .plan-essences {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .plan-essence {
+      background: #252525;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      color: #cccccc;
+    }
+    .plan-stats {
+      display: flex;
+      gap: 16px;
+      font-size: 12px;
+      color: #888888;
+    }
+    .plan-stats span { color: #feff42; }
   </style>
 </head>
 <body>
@@ -275,6 +354,11 @@
       </div>
     </div>
 
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="modeMulti" onclick="setMode('multi')">Planner</button>
+      <button class="mode-btn" id="modeSingle" onclick="setMode('single')">Calc</button>
+    </div>
+
     <div class="builds-section">
       <div class="builds-header">
         <h2>Desired Essences</h2>
@@ -283,10 +367,15 @@
       <div class="builds-list" id="buildsList"></div>
     </div>
 
-    <div class="results-box">
+    <div class="results-box" id="singleModeResults" style="display: none;">
       <h2>Energy Alluvium</h2>
       <div class="zone-list" id="zoneList"></div>
       <div class="zone-details" id="zoneDetails" style="display: none;"></div>
+    </div>
+
+    <div class="results-box" id="multiModeResults">
+      <h2>Farming Plan</h2>
+      <div id="farmingPlan"></div>
     </div>
   </div>
 
@@ -326,15 +415,235 @@
     const ATTR_POOL = 5;
     const ATTR_TICKET_POOL = 3;
 
-    let builds = [
+    let plannerBuilds = [
+      { attribute: "Agility", secondary: "Attack", skill: "Flow" },
+    ];
+    let calcBuilds = [
       { attribute: "Agility", secondary: "Attack", skill: "Flow" },
     ];
     let selectedZone = null;
     let selectedTicket = "none"; // "none", "secondary", "skill"
+    let currentMode = "multi"; // "single" or "multi"
+
+    function getBuilds() {
+      return currentMode === 'multi' ? plannerBuilds : calcBuilds;
+    }
+
+    function setBuilds(newBuilds) {
+      if (currentMode === 'multi') {
+        plannerBuilds = newBuilds;
+      } else {
+        calcBuilds = newBuilds;
+      }
+    }
+
+    function setMode(mode) {
+      currentMode = mode;
+      document.getElementById('modeSingle').classList.toggle('active', mode === 'single');
+      document.getElementById('modeMulti').classList.toggle('active', mode === 'multi');
+      document.getElementById('singleModeResults').style.display = mode === 'single' ? 'block' : 'none';
+      document.getElementById('multiModeResults').style.display = mode === 'multi' ? 'block' : 'none';
+      renderBuilds();
+      if (mode === 'multi') {
+        calculateMultiZonePlan();
+      } else {
+        calculate();
+      }
+    }
+
+    function getValidZonesForEssence(essence) {
+      const valid = [];
+      for (const [zoneId, zone] of Object.entries(ZONES)) {
+        if (zone.secondaries.includes(essence.secondary) && zone.skills.includes(essence.skill)) {
+          valid.push(zoneId);
+        }
+      }
+      return valid;
+    }
+
+    function getZoneConfigurations(zoneId, essences) {
+      // Returns all possible ticket configurations for a zone, each with the essences it can handle
+      const zone = ZONES[zoneId];
+      const secPool = zone.secondaries.length;
+      const skillPool = zone.skills.length;
+      const configs = [];
+
+      // Option 1: No ticket - all essences can be farmed
+      const probNoTicket = essences.length * (1 / ATTR_POOL) * (1 / secPool) * (1 / skillPool);
+      configs.push({
+        ticket: "none",
+        stat: null,
+        essences: essences,
+        prob: probNoTicket
+      });
+
+      // Option 2: Secondary tickets - only essences with that secondary can be farmed
+      const secGroups = {};
+      essences.forEach(e => {
+        if (!secGroups[e.secondary]) secGroups[e.secondary] = [];
+        secGroups[e.secondary].push(e);
+      });
+      for (const [sec, group] of Object.entries(secGroups)) {
+        // Find best 3 attributes among this group
+        const attrCounts = {};
+        group.forEach(e => { attrCounts[e.attribute] = (attrCounts[e.attribute] || 0) + 1; });
+        const top3Attrs = Object.entries(attrCounts).sort((a,b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+        const validEssences = group.filter(e => top3Attrs.includes(e.attribute));
+        if (validEssences.length > 0) {
+          const prob = validEssences.length * (1 / ATTR_TICKET_POOL) * 1 * (1 / skillPool);
+          configs.push({
+            ticket: "secondary",
+            stat: sec,
+            essences: validEssences,
+            prob: prob
+          });
+        }
+      }
+
+      // Option 3: Skill tickets - only essences with that skill can be farmed
+      const skillGroups = {};
+      essences.forEach(e => {
+        if (!skillGroups[e.skill]) skillGroups[e.skill] = [];
+        skillGroups[e.skill].push(e);
+      });
+      for (const [skill, group] of Object.entries(skillGroups)) {
+        const attrCounts = {};
+        group.forEach(e => { attrCounts[e.attribute] = (attrCounts[e.attribute] || 0) + 1; });
+        const top3Attrs = Object.entries(attrCounts).sort((a,b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+        const validEssences = group.filter(e => top3Attrs.includes(e.attribute));
+        if (validEssences.length > 0) {
+          const prob = validEssences.length * (1 / ATTR_TICKET_POOL) * (1 / secPool) * 1;
+          configs.push({
+            ticket: "skill",
+            stat: skill,
+            essences: validEssences,
+            prob: prob
+          });
+        }
+      }
+
+      return configs;
+    }
+
+    function calculateMultiZonePlan() {
+      const builds = getBuilds();
+      const essencesPerRun = getVal('essencesPerRun');
+      const sanityCost = getVal('sanityCost');
+      const planEl = document.getElementById('farmingPlan');
+
+      if (builds.length === 0) {
+        planEl.innerHTML = '<p class="no-zones-msg">Add essences to generate a farming plan.</p>';
+        return;
+      }
+
+      // Find valid zones for each essence
+      const essenceZones = builds.map((b, i) => ({
+        ...b,
+        index: i,
+        validZones: getValidZonesForEssence(b)
+      }));
+
+      // Check for impossible essences
+      const impossible = essenceZones.filter(e => e.validZones.length === 0);
+      if (impossible.length > 0) {
+        planEl.innerHTML = `<p class="no-zones-msg">No zone can drop: ${impossible.map(e => `${e.attribute}/${e.secondary}/${e.skill}`).join(', ')}</p>`;
+        return;
+      }
+
+      // Greedy algorithm: assign essences to zones for best efficiency
+      const remaining = [...essenceZones];
+      const plan = []; // { zoneId, essences, ticket, stat, prob }
+
+      while (remaining.length > 0) {
+        let bestOption = null;
+
+        // Try each zone and each ticket configuration
+        for (const [zoneId, zone] of Object.entries(ZONES)) {
+          const canHandle = remaining.filter(e => e.validZones.includes(zoneId));
+          if (canHandle.length === 0) continue;
+
+          const configs = getZoneConfigurations(zoneId, canHandle);
+
+          for (const config of configs) {
+            // Score: prioritize higher probability per essence
+            const score = config.prob;
+
+            if (!bestOption || score > bestOption.score) {
+              bestOption = {
+                zoneId,
+                essences: config.essences,
+                ticket: config.ticket,
+                stat: config.stat,
+                prob: config.prob,
+                score
+              };
+            }
+          }
+        }
+
+        if (!bestOption) break;
+
+        plan.push(bestOption);
+        // Remove assigned essences from remaining
+        const assignedIndices = new Set(bestOption.essences.map(e => e.index));
+        remaining.splice(0, remaining.length, ...remaining.filter(e => !assignedIndices.has(e.index)));
+      }
+
+      // Render the plan - group by zone
+      if (plan.length === 0) {
+        planEl.innerHTML = '<p class="no-zones-msg">Could not generate a farming plan.</p>';
+        return;
+      }
+
+      // Group plan items by zone
+      const byZone = {};
+      plan.forEach(p => {
+        if (!byZone[p.zoneId]) byZone[p.zoneId] = [];
+        byZone[p.zoneId].push(p);
+      });
+
+      planEl.innerHTML = Object.entries(byZone).map(([zoneId, configs]) => {
+        const zone = ZONES[zoneId];
+
+        const configsHtml = configs.map(p => {
+          const pMiss = 1 - p.prob;
+          const pRunMiss = Math.pow(pMiss, essencesPerRun);
+          const pRunHit = 1 - pRunMiss;
+          const avgSanity = (pRunHit > 0 ? 1 / pRunHit : Infinity) * sanityCost;
+          const ticketText = p.ticket === 'none' ? 'No ticket' : `Lock ${p.stat}`;
+
+          return `
+            <div class="plan-config">
+              <div class="plan-config-header">
+                <span class="plan-config-ticket">${ticketText}</span>
+                <span class="plan-config-prob">Per essence: <span>${(p.prob * 100).toFixed(2)}%</span></span>
+              </div>
+              <div class="plan-essences">
+                ${p.essences.map(e => `<span class="plan-essence">${e.attribute} / ${e.secondary} / ${e.skill}</span>`).join('')}
+              </div>
+              <div class="plan-stats">
+                Per run: <span>${(pRunHit * 100).toFixed(1)}%</span> ·
+                Avg sanity: <span>${Math.round(avgSanity).toLocaleString()}</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        return `
+          <div class="plan-zone">
+            <div class="plan-zone-name">${zone.name}</div>
+            <div class="plan-configs">
+              ${configsHtml}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     function getVal(id) { return Math.max(1, parseInt(document.getElementById(id).value) || 1); }
 
     function renderBuilds() {
+      const builds = getBuilds();
       const list = document.getElementById('buildsList');
       list.innerHTML = builds.map((b, i) => `
         <div class="build-row">
@@ -361,34 +670,44 @@
       `).join('');
     }
 
+    function recalculate() {
+      if (currentMode === 'multi') {
+        calculateMultiZonePlan();
+      } else {
+        calculate();
+      }
+    }
+
     function updateBuild(i, field, value) {
-      builds[i][field] = value;
+      getBuilds()[i][field] = value;
       selectedZone = null;
-      calculate();
+      recalculate();
     }
 
     function addBuild() {
-      builds.push({
+      getBuilds().push({
         attribute: ATTRIBUTES[0],
         secondary: ALL_SECONDARIES[0],
         skill: ALL_SKILLS[0]
       });
       selectedZone = null;
       renderBuilds();
-      calculate();
+      recalculate();
     }
 
     function removeBuild(i) {
+      const builds = getBuilds();
       if (builds.length > 1) {
         builds.splice(i, 1);
         selectedZone = null;
         renderBuilds();
-        calculate();
+        recalculate();
       }
     }
 
     function selectZone(zoneId) {
       if (!zoneId) return;
+      const builds = getBuilds();
       const zone = ZONES[zoneId];
       const requiredSecs = new Set(builds.map(b => b.secondary));
       const requiredSkills = new Set(builds.map(b => b.skill));
@@ -407,6 +726,7 @@
     }
 
     function calculate() {
+      const builds = getBuilds();
       const essencesPerRun = getVal('essencesPerRun');
       const sanityCost = getVal('sanityCost');
 
@@ -555,7 +875,6 @@
           </div>
         </div>
 
-        <h3>Confidence Levels</h3>
         <table>
           <thead>
             <tr><th>Confidence</th><th>Runs</th><th>Sanity</th><th>Regen Time</th></tr>
@@ -575,10 +894,10 @@
 
     // Initialize
     renderBuilds();
-    calculate();
+    calculateMultiZonePlan();
 
     document.querySelectorAll('.config-grid input').forEach(input => {
-      input.addEventListener('input', calculate);
+      input.addEventListener('input', recalculate);
     });
 
     // Modal
