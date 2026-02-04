@@ -292,13 +292,30 @@ function hasMatchingTalent(charName, roomType, eliteLevel) {
 
 /**
  * Phase 2: Iterative improvement via swaps
- * Try swapping characters between rooms to improve total efficiency
+ * Try swapping characters between rooms and with unassigned pool to improve total efficiency
  */
 function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIterations = 100) {
   let improved = true;
   let iterations = 0;
   let swapsMade = 0;
   let { totalEfficiency: bestEfficiency } = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels);
+
+  // Build set of assigned characters
+  const getAssignedChars = () => {
+    const assigned = new Set();
+    for (const roomOps of assignment) {
+      for (const char of roomOps) {
+        assigned.add(char);
+      }
+    }
+    return assigned;
+  };
+
+  // Get unassigned characters
+  const getUnassignedChars = () => {
+    const assigned = getAssignedChars();
+    return Object.keys(eliteLevels).filter(name => !assigned.has(name));
+  };
 
   while (improved && iterations < maxIterations) {
     improved = false;
@@ -336,6 +353,98 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
           }
         }
       }
+    }
+
+    // Try replacing assigned characters with unassigned ones
+    const unassigned = getUnassignedChars();
+    for (let roomIdx = 0; roomIdx < rooms.length; roomIdx++) {
+      const roomType = rooms[roomIdx];
+
+      for (let slot = 0; slot < assignment[roomIdx].length; slot++) {
+        const assignedChar = assignment[roomIdx][slot];
+
+        for (const unassignedChar of unassigned) {
+          // Check if unassigned char can work in this room
+          if (roomType === 'Control Nexus' && !hasMatchingTalent(unassignedChar, 'Control Nexus', eliteLevels[unassignedChar])) continue;
+
+          // Try replacing
+          assignment[roomIdx][slot] = unassignedChar;
+
+          // Now try to place the freed char in a better spot
+          let bestPlacement = null;
+          let bestNewEfficiency = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels).totalEfficiency;
+
+          // Try placing freed char in each room with space or by displacement
+          for (let targetRoom = 0; targetRoom < rooms.length; targetRoom++) {
+            if (targetRoom === roomIdx) continue;
+
+            const targetRoomType = rooms[targetRoom];
+
+            // Skip if freed char can't work in target room (for Control Nexus)
+            if (targetRoomType === 'Control Nexus' && !hasMatchingTalent(assignedChar, 'Control Nexus', eliteLevels[assignedChar])) continue;
+
+            if (assignment[targetRoom].length < 3) {
+              // Room has space, try adding
+              assignment[targetRoom].push(assignedChar);
+
+              const { totalEfficiency: effWithPlacement } = calculateTotalShipEfficiency(
+                assignment, rooms, roomTargets, eliteLevels
+              );
+
+              if (effWithPlacement > bestNewEfficiency) {
+                bestNewEfficiency = effWithPlacement;
+                bestPlacement = { room: targetRoom, action: 'add' };
+              }
+
+              assignment[targetRoom].pop();
+            }
+
+            // Try displacing someone in the target room
+            for (let targetSlot = 0; targetSlot < assignment[targetRoom].length; targetSlot++) {
+              const displaced = assignment[targetRoom][targetSlot];
+              assignment[targetRoom][targetSlot] = assignedChar;
+
+              const { totalEfficiency: effWithDisplace } = calculateTotalShipEfficiency(
+                assignment, rooms, roomTargets, eliteLevels
+              );
+
+              if (effWithDisplace > bestNewEfficiency) {
+                bestNewEfficiency = effWithDisplace;
+                bestPlacement = { room: targetRoom, slot: targetSlot, action: 'displace', displaced };
+              }
+
+              assignment[targetRoom][targetSlot] = displaced;
+            }
+          }
+
+          // Check if this replacement improves things
+          if (bestNewEfficiency > bestEfficiency + 0.01) {
+            // Apply the best placement for the freed char
+            if (bestPlacement) {
+              if (bestPlacement.action === 'add') {
+                assignment[bestPlacement.room].push(assignedChar);
+              } else if (bestPlacement.action === 'displace') {
+                // The displaced char becomes unassigned (will be reconsidered in next iteration)
+                assignment[bestPlacement.room][bestPlacement.slot] = assignedChar;
+              }
+            }
+
+            bestEfficiency = bestNewEfficiency;
+            improved = true;
+            swapsMade++;
+
+            // Update unassigned list and restart this loop
+            break;
+          } else {
+            // Revert replacement
+            assignment[roomIdx][slot] = assignedChar;
+          }
+        }
+
+        if (improved) break;
+      }
+
+      if (improved) break;
     }
 
     // Also try moving a character to an empty slot (if any room has < 3)
