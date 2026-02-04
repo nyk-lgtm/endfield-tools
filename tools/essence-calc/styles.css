@@ -133,28 +133,40 @@
 }
 
 .plan-config {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
   background: #1a1a1a;
   border: 1px solid #2a2a2a;
   border-radius: 8px;
   padding: 14px;
 }
 
-.plan-config-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+.plan-config-left {
+  flex: 1;
+  min-width: 0;
 }
 
-.plan-config-ticket { color: #feff42; font-size: 13px; font-weight: 600; }
-.plan-config-prob { color: #888888; font-size: 12px; }
-.plan-config-prob span { color: #feff42; }
+.plan-config-right {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.plan-config-ticket {
+  color: #feff42;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
 
 .plan-essences {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  margin-bottom: 10px;
 }
 
 .plan-essence {
@@ -165,14 +177,22 @@
   color: #cccccc;
 }
 
-.plan-stats {
+.plan-stat {
   display: flex;
-  gap: 16px;
+  justify-content: flex-end;
+  gap: 8px;
   font-size: 12px;
+}
+
+.plan-stat-label {
   color: #888888;
 }
 
-.plan-stats span { color: #feff42; }
+.plan-stat-value {
+  color: #feff42;
+  font-family: monospace;
+  min-width: 60px;
+}
 
 /* Error message */
 .no-zones-msg { color: #ff6666; font-size: 13px; padding: 12px; background: #1a1a1a; border-radius: 6px; }

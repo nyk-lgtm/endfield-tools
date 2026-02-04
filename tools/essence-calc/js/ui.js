@@ -173,16 +173,16 @@ export function renderMultiZonePlan(onSelectZone) {
 
       return `
         <div class="plan-config">
-          <div class="plan-config-header">
-            <span class="plan-config-ticket">${ticketText}</span>
-            <span class="plan-config-prob">Per essence: <span>${(p.prob * 100).toFixed(2)}%</span></span>
+          <div class="plan-config-left">
+            <div class="plan-config-ticket">${ticketText}</div>
+            <div class="plan-essences">
+              ${p.essences.map(e => `<span class="plan-essence">${e.attribute} / ${e.secondary} / ${e.skill}</span>`).join('')}
+            </div>
           </div>
-          <div class="plan-essences">
-            ${p.essences.map(e => `<span class="plan-essence">${e.attribute} / ${e.secondary} / ${e.skill}</span>`).join('')}
-          </div>
-          <div class="plan-stats">
-            Per run: <span>${(stats.pRunHit * 100).toFixed(1)}%</span> ·
-            Avg sanity: <span>${Math.round(stats.avgSanity).toLocaleString()}</span>
+          <div class="plan-config-right">
+            <div class="plan-stat"><span class="plan-stat-label">Per essence</span><span class="plan-stat-value">${(p.prob * 100).toFixed(2)}%</span></div>
+            <div class="plan-stat"><span class="plan-stat-label">Per run</span><span class="plan-stat-value">${(stats.pRunHit * 100).toFixed(1)}%</span></div>
+            <div class="plan-stat"><span class="plan-stat-label">Avg sanity</span><span class="plan-stat-value">${Math.round(stats.avgSanity).toLocaleString()}</span></div>
           </div>
         </div>
       `;
