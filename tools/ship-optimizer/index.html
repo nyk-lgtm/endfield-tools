@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ship Optimizer</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="title-row">
+      <h1>Ship Optimizer</h1>
+      <button class="btn-icon help-btn">?</button>
+    </div>
+    <br>
+    <!-- Room Configuration -->
+    <div class="card">
+      <h2>Ship Configuration</h2>
+      <div id="roomConfig" class="room-config">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Character Selection -->
+    <div class="card">
+      <h2>Available Characters</h2>
+      <div class="character-controls">
+        <button id="selectAll" class="btn-secondary">Select All</button>
+        <button id="selectNone" class="btn-secondary">Select None</button>
+        <label class="toggle-label">
+          <input type="checkbox" id="showEliteControls">
+          <span>Set Elite Levels</span>
+        </label>
+      </div>
+      <div id="characterList" class="character-list">
+        <!-- Characters rendered by JS -->
+      </div>
+    </div>
+
+    <!-- Optimize Button -->
+    <div class="optimize-section">
+      <button id="optimizeBtn" class="btn-primary">Optimize Ship Layout</button>
+    </div>
+
+    <!-- Results -->
+    <div class="card" id="resultsCard" style="display: none;">
+      <h2>Optimized Layout</h2>
+      <div id="resultsContainer">
+        <!-- Results rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <button class="modal-close">&times;</button>
+      <h2>Ship Optimizer Help</h2>
+      <h3>How it works</h3>
+      <p>This tool optimizes character assignments to maximize your ship's effective production efficiency.</p>
+
+      <h3>Efficiency Calculation</h3>
+      <ul>
+        <li>Base efficiency: 100% + 40% per operator in room</li>
+        <li>Matching stat bonuses multiply the base</li>
+        <li>Effective efficiency = nominal × uptime</li>
+      </ul>
+
+      <h3>Mood System</h3>
+      <ul>
+        <li>Operators work until mood hits 0%, then rest</li>
+        <li><strong>Slow Mood Drop</strong>: Extends work time</li>
+        <li><strong>Mood Regen</strong> (Control Nexus): Speeds up rest for all operators</li>
+      </ul>
+
+      <h3>Tips</h3>
+      <ul>
+        <li>Control Nexus boosts everyone's uptime - prioritize Mood Regen there</li>
+        <li>Use "Set Elite Levels" to constrain optimization to your current roster</li>
+      </ul>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
