@@ -3,6 +3,7 @@
 
 export { ZONES } from './zones.js';
 export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL } from './constants.js';
+export { CHARACTERS, CABINS, STAT_TYPES } from './characters.js';
 
 // Derived data
 import { ZONES } from './zones.js';
