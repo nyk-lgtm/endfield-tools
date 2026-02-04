@@ -195,8 +195,6 @@ function scoreCharacterForRoom(charName, roomType, maxElite, currentMoodDrop, gl
       productionValue += talent.value;
     } else if (talent.stat === 'Slow Mood Drop') {
       moodValue += talent.value;
-    } else if (talent.stat === 'Mood Regen' && roomType === 'Control Nexus') {
-      productionValue += talent.value;
     }
   }
 
@@ -213,15 +211,18 @@ function scoreCharacterForRoom(charName, roomType, maxElite, currentMoodDrop, gl
 }
 
 /**
- * Phase 1: Improved greedy assignment with dynamic re-scoring
+ * Greedy assignment with fixed Control Nexus configuration
  */
-function greedyAssignment(selectedCharacters, rooms, roomTargets) {
+function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
   const availableChars = new Set(Object.keys(selectedCharacters));
   const assignment = rooms.map(() => []);
-
-  // Assign Control Nexus first
   const controlNexusIndex = rooms.indexOf('Control Nexus');
-  assignRoomGreedy(controlNexusIndex, 'Control Nexus', assignment, availableChars, selectedCharacters, 0, null);
+
+  // Set the fixed Nexus configuration
+  assignment[controlNexusIndex] = [...fixedNexus];
+  for (const char of fixedNexus) {
+    availableChars.delete(char);
+  }
 
   // Calculate global mood regen
   let globalMoodRegen = 0;
@@ -270,15 +271,14 @@ function assignRoomGreedy(roomIndex, roomType, assignment, availableChars, elite
     if (bestChar) {
       assignment[roomIndex].push(bestChar);
       availableChars.delete(bestChar);
-      currentMoodDrop += bestMoodValue; // Update for marginal value calculation
-    } else if (roomType !== 'Control Nexus' && availableChars.size > 0) {
-      // No matching character - fill with any (except Control Nexus where non-matching chars are useless)
-      // Non-matching chars still provide +40% base efficiency to production rooms
+      currentMoodDrop += bestMoodValue;
+    } else if (availableChars.size > 0) {
+      // No matching character - fill with any available
+      // Non-matching chars still provide +40% base efficiency
       const nextChar = availableChars.values().next().value;
       assignment[roomIndex].push(nextChar);
       availableChars.delete(nextChar);
     }
-    // For Control Nexus, leave slot empty if no matching character
   }
 }
 
@@ -288,6 +288,52 @@ function assignRoomGreedy(roomIndex, roomType, assignment, availableChars, elite
 function hasMatchingTalent(charName, roomType, eliteLevel) {
   const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevel);
   return talents.length > 0;
+}
+
+/**
+ * Generate all k-combinations of an array
+ */
+function* combinations(arr, k) {
+  if (k === 0) {
+    yield [];
+    return;
+  }
+  if (arr.length < k) return;
+
+  const [first, ...rest] = arr;
+  // Combinations including first
+  for (const combo of combinations(rest, k - 1)) {
+    yield [first, ...combo];
+  }
+  // Combinations excluding first
+  yield* combinations(rest, k);
+}
+
+/**
+ * Get all characters that have Mood Regen talent for Control Nexus
+ */
+function getControlNexusCandidates(selectedCharacters) {
+  const candidates = [];
+  for (const [charName, elite] of Object.entries(selectedCharacters)) {
+    const talents = getCharacterTalentsForCabin(charName, 'Control Nexus', elite);
+    if (talents.some(t => t.stat === 'Mood Regen')) {
+      candidates.push(charName);
+    }
+  }
+  return candidates;
+}
+
+/**
+ * Generate all valid Control Nexus configurations (0 to 3 operators)
+ */
+function generateNexusConfigs(nexusCandidates) {
+  const configs = [[]]; // Include empty config
+  for (let k = 1; k <= Math.min(3, nexusCandidates.length); k++) {
+    for (const combo of combinations(nexusCandidates, k)) {
+      configs.push(combo);
+    }
+  }
+  return configs;
 }
 
 /**
@@ -487,19 +533,52 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 }
 
 /**
- * Main optimization function
+ * Main optimization function - exhaustive search over Control Nexus configurations
+ * Guarantees global optimum by trying all valid Nexus assignments
+ * @param {Function} onProgress - Optional callback(current, total) for progress updates
  */
-export function optimizeLayout(selectedCharacters, rooms, roomTargets = {}) {
-  // Phase 1: Greedy assignment with dynamic re-scoring
-  const initialAssignment = greedyAssignment(selectedCharacters, rooms, roomTargets);
+export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}, onProgress = null) {
+  const nexusCandidates = getControlNexusCandidates(selectedCharacters);
+  const nexusConfigs = generateNexusConfigs(nexusCandidates);
+  const totalConfigs = nexusConfigs.length;
 
-  // Phase 2: Iterative improvement
-  const { assignment, swapsMade } = iterativeImprovement(
-    initialAssignment, rooms, roomTargets, selectedCharacters
-  );
+  let bestAssignment = null;
+  let bestEfficiency = -Infinity;
+  let totalSwapsMade = 0;
+  let configsTried = 0;
+
+  // Try each possible Control Nexus configuration
+  for (const nexusConfig of nexusConfigs) {
+    configsTried++;
+
+    // Phase 1: Greedy assignment with this fixed Nexus config
+    const initialAssignment = greedyAssignment(selectedCharacters, rooms, roomTargets, nexusConfig);
+
+    // Phase 2: Iterative improvement
+    const { assignment, swapsMade, finalEfficiency } = iterativeImprovement(
+      initialAssignment, rooms, roomTargets, selectedCharacters
+    );
+
+    // Track the best result
+    if (finalEfficiency > bestEfficiency) {
+      bestEfficiency = finalEfficiency;
+      bestAssignment = assignment;
+      totalSwapsMade = swapsMade;
+    }
+
+    // Yield to browser for UI updates
+    if (onProgress) {
+      onProgress(configsTried, totalConfigs);
+    }
+    if (configsTried % 10 === 0) {
+      await new Promise(r => setTimeout(r, 0));
+    }
+  }
+
+  console.log(`Global optimization: tried ${configsTried} Nexus configurations`);
 
   // Build results
-  return buildResults(assignment, rooms, roomTargets, selectedCharacters, swapsMade);
+  return buildResults(bestAssignment, rooms, roomTargets, selectedCharacters, totalSwapsMade);
 }
 
 /**

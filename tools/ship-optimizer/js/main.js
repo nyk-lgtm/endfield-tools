@@ -107,7 +107,7 @@ function handleTargetChange(e) {
   }
 }
 
-function handleOptimize() {
+async function handleOptimize() {
   const selectedChars = getSelectedCharacters();
   const rooms = getRooms();
   const roomTargets = getRoomTargets();
@@ -118,7 +118,22 @@ function handleOptimize() {
     return;
   }
 
-  const results = optimizeLayout(selectedChars, rooms, roomTargets);
+  const btn = document.getElementById('optimizeBtn');
+  const progress = document.getElementById('optimizeProgress');
+
+  btn.disabled = true;
+  btn.textContent = 'Optimizing...';
+
+  const onProgress = (current, total) => {
+    progress.textContent = `${current}/${total}`;
+  };
+
+  const results = await optimizeLayout(selectedChars, rooms, roomTargets, onProgress);
+
+  btn.disabled = false;
+  btn.textContent = 'Optimize Ship Layout';
+  progress.textContent = '';
+
   setResults(results);
   renderResults(elements.resultsContainer, elements.resultsCard);
 }
