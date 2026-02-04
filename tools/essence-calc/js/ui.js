@@ -1,7 +1,8 @@
 import { ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
 import {
   getBuilds, getSelectedZone, setSelectedZone,
-  getSelectedTicket, setSelectedTicket, getCurrentMode
+  getSelectedTicket, setSelectedTicket, getCurrentMode,
+  getOptimizeMode
 } from './state.js';
 import {
   getValidZonesForEssence, getZoneConfigurations,
@@ -119,6 +120,17 @@ export function renderMultiZonePlan(onSelectZone) {
   // Greedy algorithm: assign essences to zones for best efficiency
   const remaining = [...essenceZones];
   const plan = [];
+  const optimizeMode = getOptimizeMode();
+
+  // Scoring function based on optimization mode
+  const getScore = (config) => {
+    if (optimizeMode === 'probability') {
+      // Best per-essence probability
+      return config.prob;
+    }
+    // Sanity efficiency (default): more essences at higher prob = less total sanity
+    return config.essences.length * config.prob;
+  };
 
   while (remaining.length > 0) {
     let bestOption = null;
@@ -130,7 +142,7 @@ export function renderMultiZonePlan(onSelectZone) {
       const configs = getZoneConfigurations(zoneId, canHandle);
 
       for (const config of configs) {
-        const score = config.prob;
+        const score = getScore(config);
 
         if (!bestOption || score > bestOption.score) {
           bestOption = {

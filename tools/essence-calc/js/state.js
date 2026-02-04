@@ -12,6 +12,7 @@ let calcBuilds = [
 let selectedZone = null;
 let selectedTicket = "none";
 let currentMode = "multi";
+let optimizeMode = "sanity"; // "sanity" | "probability" | "zones"
 
 // State accessors
 export function getBuilds() {
@@ -48,6 +49,14 @@ export function getCurrentMode() {
 
 export function setCurrentMode(mode) {
   currentMode = mode;
+}
+
+export function getOptimizeMode() {
+  return optimizeMode;
+}
+
+export function setOptimizeMode(mode) {
+  optimizeMode = mode;
 }
 
 // Build mutations

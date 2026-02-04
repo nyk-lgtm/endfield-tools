@@ -45,7 +45,16 @@
     </div>
 
     <div class="card" id="multiModeResults">
-      <h2>Farming Plan</h2>
+      <div class="plan-header">
+        <h2>Farming Plan</h2>
+        <div class="optimize-select">
+          <label>Optimize for</label>
+          <select id="optimizeMode" title="How to prioritize farming assignments">
+            <option value="sanity" title="Balance probability and grouping for lowest total sanity">Sanity Efficiency</option>
+            <option value="probability" title="Maximize per-essence drop rate, may split essences across zones">Best Probability</option>
+          </select>
+        </div>
+      </div>
       <div id="farmingPlan"></div>
     </div>
   </div>

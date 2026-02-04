@@ -4,7 +4,7 @@ import {
   removeBuild as stateRemoveBuild,
   updateBuild as stateUpdateBuild,
   setSelectedZone, setSelectedTicket,
-  getSelectedZone
+  getSelectedZone, setOptimizeMode
 } from './state.js';
 import { ZONES } from '../../../data/index.js';
 import {
@@ -79,6 +79,12 @@ function init() {
   // Config inputs
   document.querySelectorAll('.config-grid input').forEach(input => {
     input.addEventListener('input', recalculate);
+  });
+
+  // Optimize mode dropdown
+  document.getElementById('optimizeMode').addEventListener('change', (e) => {
+    setOptimizeMode(e.target.value);
+    recalculate();
   });
 
   // Help modal
