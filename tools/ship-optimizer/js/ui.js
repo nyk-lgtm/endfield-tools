@@ -5,12 +5,12 @@ import {
   getRooms,
   getRoomTarget,
   isCharacterSelected,
-  getSelectedCharacters,
-  getShowEliteControls,
+  getEliteLevel,
   getResults
 } from './state.js';
 
 const GROWTH_PRODUCTS = ['Fungal Matter', 'Plant', 'Rare Mineral'];
+const ELITE_LEVELS = ['e1', 'e2', 'e3', 'max'];
 
 export function renderRoomConfig(container) {
   const rooms = getRooms();
@@ -74,16 +74,22 @@ function getCharacterCabinSummary(charData) {
   return [...cabins].map(c => c.replace(' Cabin', '').replace(' Chamber', '').replace(' Room', '')).join(', ');
 }
 
+// Format elite level for display
+function formatEliteLabel(level) {
+  if (level === 'max') return 'E4';
+  return level.toUpperCase();
+}
+
 export function renderCharacterList(container) {
-  const showElite = getShowEliteControls();
-  const selectedChars = getSelectedCharacters();
-
-  container.className = `character-list${showElite ? ' show-elite-controls' : ''}`;
-
   const html = Object.entries(CHARACTERS).map(([name, data]) => {
     const selected = isCharacterSelected(name);
-    const eliteLevel = selectedChars[name] || 'max';
+    const eliteLevel = getEliteLevel(name);
     const cabinSummary = getCharacterCabinSummary(data);
+
+    const eliteButtonsHtml = ELITE_LEVELS.map(level => {
+      const isActive = eliteLevel === level;
+      return `<button class="elite-btn${isActive ? ' active' : ''}" data-name="${name}" data-level="${level}">${formatEliteLabel(level)}</button>`;
+    }).join('');
 
     return `
       <div class="character-item${selected ? ' selected' : ''}" data-name="${name}">
@@ -92,11 +98,9 @@ export function renderCharacterList(container) {
           <div class="character-name">${name}</div>
           <div class="character-talents">${cabinSummary}</div>
         </div>
-        <select class="elite-select" data-name="${name}">
-          <option value="max" ${eliteLevel === 'max' ? 'selected' : ''}>Max</option>
-          <option value="e2" ${eliteLevel === 'e2' ? 'selected' : ''}>E2</option>
-          <option value="e1" ${eliteLevel === 'e1' ? 'selected' : ''}>E1</option>
-        </select>
+        <div class="elite-buttons">
+          ${eliteButtonsHtml}
+        </div>
       </div>
     `;
   }).join('');
@@ -136,7 +140,6 @@ export function renderResults(container, resultsCard) {
 
     let efficiencyHtml = '';
     if (room.efficiencyByProduct) {
-      // Multiple products - show each
       const productEffHtml = Object.entries(room.efficiencyByProduct)
         .map(([product, eff]) => {
           const shortName = product.replace(' Matter', '').replace('Rare ', '');
@@ -173,10 +176,6 @@ export function renderResults(container, resultsCard) {
       <div class="summary-title">Ship Summary</div>
       <div class="summary-stats">
         <div class="summary-stat">
-          <span class="summary-stat-label">Mood Regen Bonus</span>
-          <span class="summary-stat-value">+${results.summary.globalMoodRegen}%</span>
-        </div>
-        <div class="summary-stat">
           <span class="summary-stat-label">Global Uptime</span>
           <span class="summary-stat-value">${results.summary.uptime.toFixed(1)}%</span>
         </div>
@@ -188,11 +187,6 @@ export function renderResults(container, resultsCard) {
           <span class="summary-stat-label">Clue Efficiency</span>
           <span class="summary-stat-value">${results.summary.clueEfficiency.toFixed(1)}%</span>
         </div>
-      </div>
-      <div class="summary-meta">
-        ${results.summary.swapsMade > 0
-          ? `Optimization: ${results.summary.swapsMade} swap${results.summary.swapsMade > 1 ? 's' : ''} improved on greedy solution`
-          : 'Greedy solution was optimal (no swaps needed)'}
       </div>
     </div>
   `;

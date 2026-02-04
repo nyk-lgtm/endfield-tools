@@ -1,6 +1,5 @@
 // Ship Optimizer entry point
 
-import { CHARACTERS } from '../../../data/index.js';
 import {
   getRooms,
   setRoom,
@@ -9,12 +8,11 @@ import {
   isCharacterSelected,
   selectCharacter,
   deselectCharacter,
-  setCharacterElite,
   selectAllCharacters,
   deselectAllCharacters,
-  getSelectedCharacters,
-  getShowEliteControls,
-  setShowEliteControls,
+  setEliteLevel,
+  setAllEliteLevels,
+  getSelectedCharactersWithElite,
   setResults
 } from './state.js';
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
@@ -45,32 +43,46 @@ function handleCharacterClick(e) {
   const item = e.target.closest('.character-item');
   if (!item) return;
 
-  // Ignore clicks on the elite select dropdown
-  if (e.target.classList.contains('elite-select')) return;
+  // Ignore clicks on elite buttons
+  if (e.target.classList.contains('elite-btn')) return;
 
   const name = item.dataset.name;
 
   if (isCharacterSelected(name)) {
     deselectCharacter(name);
   } else {
-    selectCharacter(name, getShowEliteControls() ? 'max' : 'max');
+    selectCharacter(name);
   }
 
   renderCharacterList(elements.characterList);
 }
 
-function handleEliteChange(e) {
-  if (!e.target.classList.contains('elite-select')) return;
+function handleEliteClick(e) {
+  if (!e.target.classList.contains('elite-btn')) return;
 
   const name = e.target.dataset.name;
-  const elite = e.target.value;
+  const level = e.target.dataset.level;
 
-  // Auto-select the character if not already selected
+  setEliteLevel(name, level);
+
+  // Auto-select the character when setting elite level
   if (!isCharacterSelected(name)) {
-    selectCharacter(name, elite);
-  } else {
-    setCharacterElite(name, elite);
+    selectCharacter(name);
   }
+
+  renderCharacterList(elements.characterList);
+}
+
+function handleGlobalEliteClick(e) {
+  if (!e.target.classList.contains('global-elite-btn')) return;
+
+  const level = e.target.dataset.level;
+  setAllEliteLevels(level);
+
+  // Update active state on global buttons
+  document.querySelectorAll('.global-elite-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.level === level);
+  });
 
   renderCharacterList(elements.characterList);
 }
@@ -108,7 +120,7 @@ function handleTargetChange(e) {
 }
 
 async function handleOptimize() {
-  const selectedChars = getSelectedCharacters();
+  const selectedChars = getSelectedCharactersWithElite();
   const rooms = getRooms();
   const roomTargets = getRoomTargets();
 
@@ -155,13 +167,13 @@ function init() {
   elements.roomConfig.addEventListener('change', handleRoomTypeChange);
   elements.roomConfig.addEventListener('change', handleTargetChange);
 
-  // Character selection
+  // Character selection and elite level clicks
   elements.characterList.addEventListener('click', handleCharacterClick);
-  elements.characterList.addEventListener('change', handleEliteChange);
+  elements.characterList.addEventListener('click', handleEliteClick);
 
   // Select all/none buttons
   document.getElementById('selectAll').addEventListener('click', () => {
-    selectAllCharacters(CHARACTERS);
+    selectAllCharacters();
     renderCharacterList(elements.characterList);
   });
 
@@ -170,11 +182,8 @@ function init() {
     renderCharacterList(elements.characterList);
   });
 
-  // Elite controls toggle
-  document.getElementById('showEliteControls').addEventListener('change', (e) => {
-    setShowEliteControls(e.target.checked);
-    renderCharacterList(elements.characterList);
-  });
+  // Global elite level buttons
+  document.querySelector('.global-elite-controls').addEventListener('click', handleGlobalEliteClick);
 
   // Optimize button
   document.getElementById('optimizeBtn').addEventListener('click', handleOptimize);

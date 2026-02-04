@@ -26,27 +26,23 @@ export function getCharacterTalents(charName, maxElite = 'max') {
   const talents = [];
   const seen = new Set();
 
-  if (maxElite === 'max') {
-    for (const elite of ['e3', 'e4']) {
-      const talent = charData.ship_talents[elite];
-      const key = `${talent.cabin}|${talent.stat}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        talents.push({ cabin: talent.cabin, stat: talent.stat, value: talent.value, elite });
-      }
+  // Talent slots: slot1 (e1→e3), slot2 (e2→e4)
+  const eliteRanges = {
+    'max': ['e3', 'e4'],  // both slots upgraded
+    'e4': ['e3', 'e4'],
+    'e3': ['e3', 'e2'],   // slot1 upgraded, slot2 base
+    'e2': ['e1', 'e2'],   // both slots base
+    'e1': ['e1']          // slot1 only
+  };
+
+  const elites = eliteRanges[maxElite] || ['e1'];
+  for (const elite of elites) {
+    const talent = charData.ship_talents[elite];
+    const key = `${talent.cabin}|${talent.stat}`;
+    if (!seen.has(key)) {
+      seen.add(key);
+      talents.push({ cabin: talent.cabin, stat: talent.stat, value: talent.value, elite });
     }
-  } else if (maxElite === 'e2') {
-    for (const elite of ['e1', 'e2']) {
-      const talent = charData.ship_talents[elite];
-      const key = `${talent.cabin}|${talent.stat}`;
-      if (!seen.has(key)) {
-        seen.add(key);
-        talents.push({ cabin: talent.cabin, stat: talent.stat, value: talent.value, elite });
-      }
-    }
-  } else {
-    const talent = charData.ship_talents.e1;
-    talents.push({ cabin: talent.cabin, stat: talent.stat, value: talent.value, elite: 'e1' });
   }
 
   return talents;
@@ -574,8 +570,6 @@ export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}
       await new Promise(r => setTimeout(r, 0));
     }
   }
-
-  console.log(`Global optimization: tried ${configsTried} Nexus configurations`);
 
   // Build results
   return buildResults(bestAssignment, rooms, roomTargets, selectedCharacters, totalSwapsMade);

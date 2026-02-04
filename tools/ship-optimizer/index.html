@@ -28,10 +28,13 @@
       <div class="character-controls">
         <button id="selectAll" class="btn-secondary">Select All</button>
         <button id="selectNone" class="btn-secondary">Select None</button>
-        <label class="toggle-label">
-          <input type="checkbox" id="showEliteControls">
-          <span>Set Elite Levels</span>
-        </label>
+        <div class="global-elite-controls">
+          <span class="global-elite-label">Set all to:</span>
+          <button class="global-elite-btn" data-level="e1">E1</button>
+          <button class="global-elite-btn" data-level="e2">E2</button>
+          <button class="global-elite-btn" data-level="e3">E3</button>
+          <button class="global-elite-btn active" data-level="max">E4</button>
+        </div>
       </div>
       <div id="characterList" class="character-list">
         <!-- Characters rendered by JS -->
@@ -46,7 +49,7 @@
 
     <!-- Results -->
     <div class="card" id="resultsCard" style="display: none;">
-      <h2>Optimized Layout</h2>
+      <h2>Suggested Layout</h2>
       <div id="resultsContainer">
         <!-- Results rendered by JS -->
       </div>
@@ -56,29 +59,26 @@
   <div class="modal-overlay" id="helpModal">
     <div class="modal">
       <button class="modal-close">&times;</button>
-      <h2>Ship Optimizer Help</h2>
-      <h3>How it works</h3>
-      <p>This tool optimizes character assignments to maximize your ship's effective production efficiency.</p>
+      <h2>Math</h2>
 
-      <h3>Efficiency Calculation</h3>
-      <ul>
-        <li>Base efficiency: 100% + 40% per operator in room</li>
-        <li>Matching stat bonuses multiply the base</li>
-        <li>Effective efficiency = nominal × uptime</li>
-      </ul>
+      <p><strong>Efficiency Calculation</strong></p>
+      <p>Base efficiency depends on operators in room:</p>
+      <p><code>base = 100% + (40% × operator_count)</code></p>
+      <p>Matching stat bonuses sum up and multiply the base:</p>
+      <p><code>nominal = base × (1 + stat_bonus%)</code></p>
 
-      <h3>Mood System</h3>
-      <ul>
-        <li>Operators work until mood hits 0%, then rest</li>
-        <li><strong>Slow Mood Drop</strong>: Extends work time</li>
-        <li><strong>Mood Regen</strong> (Control Nexus): Speeds up rest for all operators</li>
-      </ul>
+      <p><strong>Mood System</strong></p>
+      <p>Operators work until mood hits 0%, then rest. Base rates:</p>
+      <p><code>mood_drop = 7% per hour</code></p>
+      <p><code>mood_regen = 12% per hour</code></p>
+      <p>Slow Mood Drop reduces drop rate, Mood Regen (Control Nexus) increases regen for all:</p>
+      <p><code>work_hours = 100 / (7 × (1 − slow_mood_drop%))</code></p>
+      <p><code>rest_hours = 100 / (12 × (1 + mood_regen%))</code></p>
 
-      <h3>Tips</h3>
-      <ul>
-        <li>Control Nexus boosts everyone's uptime - prioritize Mood Regen there</li>
-        <li>Use "Set Elite Levels" to constrain optimization to your current roster</li>
-      </ul>
+      <p><strong>Effective Efficiency</strong></p>
+      <p>Uptime accounts for work/rest cycle:</p>
+      <p><code>uptime = work_hours / (work_hours + rest_hours)</code></p>
+      <p><code>effective = nominal × uptime</code></p>
     </div>
   </div>
 

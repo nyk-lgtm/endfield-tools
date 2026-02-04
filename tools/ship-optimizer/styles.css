@@ -134,20 +134,39 @@
   color: #feff42;
 }
 
-.toggle-label {
+/* Global Elite Controls */
+.global-elite-controls {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #888;
-  font-size: 0.9rem;
-  cursor: pointer;
   margin-left: auto;
 }
 
-.toggle-label input[type="checkbox"] {
-  accent-color: #feff42;
-  width: 16px;
-  height: 16px;
+.global-elite-label {
+  color: #888;
+  font-size: 0.85rem;
+}
+
+.global-elite-btn {
+  background: #1a1a1a;
+  border: 1px solid #333;
+  color: #888;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.global-elite-btn:hover {
+  border-color: #feff42;
+  color: #e0e0e0;
+}
+
+.global-elite-btn.active {
+  background: #feff42;
+  border-color: #feff42;
+  color: #0a0a0a;
 }
 
 /* Character List */
@@ -203,24 +222,34 @@
   text-overflow: ellipsis;
 }
 
-.elite-select {
+/* Per-character Elite Buttons */
+.elite-buttons {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.elite-btn {
   background: #0a0a0a;
   border: 1px solid #333;
-  color: #e0e0e0;
-  padding: 0.25rem 0.4rem;
-  border-radius: 4px;
-  font-size: 0.8rem;
+  color: #666;
+  padding: 0.2rem 0.4rem;
+  border-radius: 3px;
+  font-size: 0.7rem;
   cursor: pointer;
-  display: none;
+  transition: all 0.15s ease;
+  min-width: 28px;
 }
 
-.show-elite-controls .elite-select {
-  display: block;
+.elite-btn:hover {
+  border-color: #666;
+  color: #aaa;
 }
 
-.elite-select:focus {
-  outline: none;
+.elite-btn.active {
+  background: #feff42;
   border-color: #feff42;
+  color: #0a0a0a;
+  font-weight: 600;
 }
 
 /* Optimize Button */
@@ -428,8 +457,9 @@
     align-items: stretch;
   }
 
-  .toggle-label {
+  .global-elite-controls {
     margin-left: 0;
     margin-top: 0.5rem;
+    justify-content: flex-start;
   }
 }
