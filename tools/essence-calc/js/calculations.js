@@ -1,4 +1,4 @@
-import { ZONES, ATTR_POOL, ATTR_TICKET_POOL } from './data.js';
+import { ZONES, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
 
 export function getValidZonesForEssence(essence) {
   const valid = [];

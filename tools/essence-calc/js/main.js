@@ -6,7 +6,7 @@ import {
   setSelectedZone, setSelectedTicket,
   getSelectedZone
 } from './state.js';
-import { ZONES } from './data.js';
+import { ZONES } from '../../../data/index.js';
 import {
   cacheElements, renderBuilds, renderModeToggle,
   renderMultiZonePlan, renderSingleZoneCalc, toggleModal, getVal

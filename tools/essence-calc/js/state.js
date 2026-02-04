@@ -1,4 +1,4 @@
-import { ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS } from './data.js';
+import { ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS } from '../../../data/index.js';
 
 // Application state
 let plannerBuilds = [

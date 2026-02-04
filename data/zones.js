@@ -1,4 +1,6 @@
 // Zone definitions with their available skills and secondaries
+// Each zone has 8 skills and 8 secondaries that can drop there
+
 export const ZONES = {
   "the-hub": {
     name: "The Hub",
@@ -26,13 +28,3 @@ export const ZONES = {
     secondaries: ["Attack", "HP", "Electric DMG", "Cryo DMG", "Critical Rate", "Ultimate Gain", "Arts DMG", "Treatment Efficiency"]
   }
 };
-
-export const ATTRIBUTES = ["Agility", "Strength", "Will", "Intellect", "Main Attribute"];
-
-// Derived lists from zone data
-export const ALL_SECONDARIES = [...new Set(Object.values(ZONES).flatMap(z => z.secondaries))].sort();
-export const ALL_SKILLS = [...new Set(Object.values(ZONES).flatMap(z => z.skills))].sort();
-
-// Game mechanics constants
-export const ATTR_POOL = 5;           // Total attributes in the drop pool
-export const ATTR_TICKET_POOL = 3;    // Attributes available when using a ticket

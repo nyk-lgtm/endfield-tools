@@ -1,4 +1,4 @@
-import { ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from './data.js';
+import { ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
 import {
   getBuilds, getSelectedZone, setSelectedZone,
   getSelectedTicket, setSelectedTicket, getCurrentMode
