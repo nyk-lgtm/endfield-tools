@@ -218,7 +218,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
 
   // Render zone list
   elements.zoneList.innerHTML = zoneResults.map(r => `
-    <div class="zone-item ${r.isValid ? '' : 'invalid'} ${selectedZone === r.zoneId ? 'selected' : ''}"
+    <div class="list-item ${r.isValid ? '' : 'disabled'} ${selectedZone === r.zoneId ? 'selected' : ''}"
          data-zone-id="${r.zoneId}" data-valid="${r.isValid}">
       <span class="zone-item-name">${r.zone.name}</span>
       <span class="zone-item-status">${r.isValid ? 'Available' : 'Missing stats'}</span>
@@ -226,7 +226,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   `).join('');
 
   // Attach zone click listeners
-  elements.zoneList.querySelectorAll('.zone-item').forEach(el => {
+  elements.zoneList.querySelectorAll('.list-item').forEach(el => {
     el.addEventListener('click', () => {
       if (el.dataset.valid === 'true') {
         onSelectZone(el.dataset.zoneId);
@@ -270,15 +270,15 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
         <span>${zone.name}</span>
         <span>Per Essence</span>
       </div>
-      <div class="ticket-option ${selectedTicket === 'none' ? 'selected' : ''}" data-ticket="none">
+      <div class="list-item ${selectedTicket === 'none' ? 'selected' : ''}" data-ticket="none">
         <span class="ticket-option-name">No ticket</span>
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_POOL)} × ${frac(secPool)} × ${frac(skillPool)} =</span> ${(probNoTicket * 100).toFixed(2)}%</span>
       </div>
-      <div class="ticket-option ${selectedTicket === 'secondary' ? 'selected' : ''}" data-ticket="secondary">
+      <div class="list-item ${selectedTicket === 'secondary' ? 'selected' : ''}" data-ticket="secondary">
         <span class="ticket-option-name">Lock ${secConfig.stats.join('/')} (${secConfig.count}/${builds.length} essences)</span>
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × 1 × ${frac(skillPool)} =</span> ${(probSecTicket * 100).toFixed(2)}%</span>
       </div>
-      <div class="ticket-option ${selectedTicket === 'skill' ? 'selected' : ''}" data-ticket="skill">
+      <div class="list-item ${selectedTicket === 'skill' ? 'selected' : ''}" data-ticket="skill">
         <span class="ticket-option-name">Lock ${skillConfig.stats.join('/')} (${skillConfig.count}/${builds.length} essences)</span>
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × ${frac(secPool)} × 1 =</span> ${(probSkillTicket * 100).toFixed(2)}%</span>
       </div>
@@ -319,7 +319,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   `;
 
   // Attach ticket click listeners
-  elements.zoneDetails.querySelectorAll('.ticket-option').forEach(el => {
+  elements.zoneDetails.querySelectorAll('.list-item[data-ticket]').forEach(el => {
     el.addEventListener('click', () => {
       onSelectTicket(el.dataset.ticket);
     });

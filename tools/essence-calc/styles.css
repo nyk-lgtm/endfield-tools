@@ -1,0 +1,182 @@
+/* Essence Calculator specific styles */
+
+/* Config inputs row */
+.config-grid {
+  display: flex;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.config-grid > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.config-grid label {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.config-grid input[type="number"] {
+  width: 70px;
+  margin: 0;
+  -moz-appearance: textfield;
+}
+
+.config-grid input[type="number"]::-webkit-outer-spin-button,
+.config-grid input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Builds section */
+.builds-section { margin-bottom: 20px; }
+.builds-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.builds-list { display: flex; flex-direction: column; gap: 8px; }
+
+.build-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto;
+  gap: 8px;
+  align-items: end;
+  padding: 12px;
+  background: #141414;
+  border-radius: 8px;
+  border: 1px solid #2a2a2a;
+}
+
+.btn-remove {
+  background: #1a1a1a;
+  color: #888888;
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 8px 10px;
+  cursor: pointer;
+  font-size: 14px;
+  align-self: end;
+  height: fit-content;
+}
+
+.btn-remove:hover { color: #ff6666; border-color: #ff6666; }
+.btn-remove:disabled { background: #111111; color: #444444; border-color: #222222; cursor: not-allowed; }
+
+/* Zone list */
+.zone-list { display: flex; flex-direction: column; gap: 6px; }
+.zone-item-name { color: #cccccc; font-size: 14px; }
+.zone-item-status { font-size: 12px; color: #888888; }
+.list-item.disabled .zone-item-status { color: #666666; }
+.list-item.selected .zone-item-name { color: #feff42; }
+
+/* Zone details */
+.zone-details {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #2a2a2a;
+}
+
+.zone-details h3 { color: #ffffff; margin-top: 0; }
+
+/* Ticket options */
+.ticket-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.ticket-header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 12px 4px;
+  font-size: 11px;
+  color: #666666;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.ticket-header span:first-child {
+  color: #ffffff;
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.ticket-option-name { color: #cccccc; font-size: 13px; }
+.ticket-option-prob { font-size: 13px; font-family: monospace; color: #feff42; }
+.prob-calc { color: #888888; }
+
+/* Stats row */
+.stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
+
+/* Plan display */
+.plan-zone {
+  background: #141414;
+  border: 1px solid #2a2a2a;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+
+.plan-zone-name {
+  color: #ffffff;
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.plan-configs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.plan-config {
+  background: #1a1a1a;
+  border: 1px solid #2a2a2a;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.plan-config-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.plan-config-ticket { color: #feff42; font-size: 13px; font-weight: 600; }
+.plan-config-prob { color: #888888; font-size: 12px; }
+.plan-config-prob span { color: #feff42; }
+
+.plan-essences {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.plan-essence {
+  background: #252525;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  color: #cccccc;
+}
+
+.plan-stats {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: #888888;
+}
+
+.plan-stats span { color: #feff42; }
+
+/* Error message */
+.no-zones-msg { color: #ff6666; font-size: 13px; padding: 12px; background: #1a1a1a; border-radius: 6px; }
+
+/* Title row */
+.title-row { display: flex; align-items: center; justify-content: space-between; }
+.title-row h1 { margin: 0; }

@@ -3,74 +3,62 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Essence Farming Calculator</title>
-  <link rel="stylesheet" href="styles.css">
+  <title>Arknights Tools</title>
+  <link rel="stylesheet" href="shared/styles.css">
+  <style>
+    .hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    .hero h1 {
+      font-size: 32px;
+      margin-bottom: 8px;
+    }
+    .hero p {
+      color: #888888;
+      font-size: 14px;
+    }
+    .tools-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 600px) {
+      .tools-grid { grid-template-columns: 1fr; }
+    }
+    .tool-card {
+      background: #141414;
+      border: 1px solid #2a2a2a;
+      border-radius: 10px;
+      padding: 16px;
+      text-decoration: none;
+      transition: border-color 0.15s, transform 0.15s;
+    }
+    .tool-card:hover {
+      border-color: #feff42;
+      transform: translateY(-2px);
+    }
+    .tool-card h2 {
+      color: #feff42;
+      font-size: 18px;
+      margin: 0 0 8px 0;
+    }
+    .tool-card p {
+      color: #888888;
+      font-size: 13px;
+      margin: 0;
+      line-height: 1.5;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
-    <div class="title-row">
-      <h1>Essence Farming Calculator</h1>
-      <button class="help-btn">?</button>
-    </div>
-    <br>
-    <div class="config-grid">
-      <div>
-        <label>Essences / Run</label>
-        <input type="number" id="essencesPerRun" value="3" min="1">
-      </div>
-      <div>
-        <label>Sanity / Run</label>
-        <input type="number" id="sanityCost" value="80" min="1">
-      </div>
-    </div>
-
-    <div class="mode-toggle">
-      <button class="mode-btn active" id="modeMulti">Planner</button>
-      <button class="mode-btn" id="modeSingle">Calc</button>
-    </div>
-
-    <div class="builds-section">
-      <div class="builds-header">
-        <h2>Desired Essences</h2>
-        <button class="btn-add">+ Add Essence</button>
-      </div>
-      <div class="builds-list" id="buildsList"></div>
-    </div>
-
-    <div class="results-box" id="singleModeResults" style="display: none;">
-      <h2>Energy Alluvium</h2>
-      <div class="zone-list" id="zoneList"></div>
-      <div class="zone-details" id="zoneDetails" style="display: none;"></div>
-    </div>
-
-    <div class="results-box" id="multiModeResults">
-      <h2>Farming Plan</h2>
-      <div id="farmingPlan"></div>
+    <div class="tools-grid">
+      <a href="tools/essence-calc/" class="tool-card">
+        <h2>Essence Calc</h2>
+        <p>Find optimal zones and ticket configs.</p>
+      </a>
     </div>
   </div>
-
-  <div class="modal-overlay" id="helpModal">
-    <div class="modal">
-      <button class="modal-close">&times;</button>
-      <h2>Math</h2>
-      <p><strong>Per-Essence Probability</strong></p>
-      <p>Each essence rolls independently for attribute, secondary, and skill:</p>
-      <p><code>P_essence = (1/attr_pool) × (1/sec_pool) × (1/skill_pool)</code></p>
-      <p>If you have multiple desired essences, their probabilities add up because each roll can only match one target at a time—these are mutually exclusive outcomes.</p>
-
-      <p><strong>Per-Run Probability</strong></p>
-      <p>Each run gives you multiple essences. The chance of getting at least one match:</p>
-      <p><code>P_run = 1 − (1 − P_essence)^essences_per_run</code></p>
-
-      <p><strong>Confidence Levels</strong></p>
-      <p>How many runs to reach X% confidence of getting at least one match:</p>
-      <p><code>Runs = ⌈ln(1 − confidence) / ln(1 − P_run)⌉</code></p>
-
-      <p><strong>Sanity Regen</strong></p>
-      <p>1 sanity regenerates every 7 minutes and 12 seconds</p>
-    </div>
-  </div>
-
-  <script type="module" src="js/main.js"></script>
 </body>
 </html>
