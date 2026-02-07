@@ -6,7 +6,7 @@ import {
   setSelectedZone, setSelectedTicket,
   getSelectedZone, setOptimizeMode
 } from './state.js';
-import { ZONES } from '../../../data/index.js';
+import { ESSENCE_ZONES } from '../../../data/index.js';
 import {
   cacheElements, renderBuilds, renderModeToggle,
   renderMultiZonePlan, renderSingleZoneCalc, toggleModal, getVal
@@ -42,7 +42,7 @@ function handleAddBuild() {
 function handleSelectZone(zoneId) {
   if (!zoneId) return;
   const builds = getBuilds();
-  const zone = ZONES[zoneId];
+  const zone = ESSENCE_ZONES[zoneId];
   const requiredSecs = new Set(builds.map(b => b.secondary));
   const requiredSkills = new Set(builds.map(b => b.skill));
   const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));

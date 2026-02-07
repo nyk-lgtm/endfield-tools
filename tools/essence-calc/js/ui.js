@@ -1,4 +1,4 @@
-import { ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
+import { ESSENCE_ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
 import {
   getBuilds, getSelectedZone, setSelectedZone,
   getSelectedTicket, setSelectedTicket, getCurrentMode,
@@ -135,7 +135,7 @@ export function renderMultiZonePlan(onSelectZone) {
   while (remaining.length > 0) {
     let bestOption = null;
 
-    for (const [zoneId, zone] of Object.entries(ZONES)) {
+    for (const [zoneId, zone] of Object.entries(ESSENCE_ZONES)) {
       const canHandle = remaining.filter(e => e.validZones.includes(zoneId));
       if (canHandle.length === 0) continue;
 
@@ -177,7 +177,7 @@ export function renderMultiZonePlan(onSelectZone) {
   });
 
   elements.farmingPlan.innerHTML = Object.entries(byZone).map(([zoneId, configs]) => {
-    const zone = ZONES[zoneId];
+    const zone = ESSENCE_ZONES[zoneId];
 
     const configsHtml = configs.map(p => {
       const stats = calculatePlanStats(p.prob, essencesPerRun, sanityCost);
@@ -220,7 +220,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
 
   // Calculate zone validity
   const zoneResults = [];
-  for (const [zoneId, zone] of Object.entries(ZONES)) {
+  for (const [zoneId, zone] of Object.entries(ESSENCE_ZONES)) {
     const requiredSecs = new Set(builds.map(b => b.secondary));
     const requiredSkills = new Set(builds.map(b => b.skill));
     const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));
@@ -253,7 +253,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   }
 
   elements.zoneDetails.style.display = 'block';
-  const zone = ZONES[selectedZone];
+  const zone = ESSENCE_ZONES[selectedZone];
   const secPool = zone.secondaries.length;
   const skillPool = zone.skills.length;
 

@@ -184,9 +184,9 @@ export const CABINS = [
   "Reception Room"
 ];
 
-export const STAT_TYPES = {
+export const SHIP_STAT_TYPES = {
   production: ["Weapon EXP", "Operator EXP", "Fungal Matter", "Plant", "Rare Mineral"],
-  efficiency: ["Slow Mood Drop", "Mood Regen"],
+  mood: ["Slow Mood Drop", "Mood Regen"],
   clue: [
     "Clue 1 Rate-UP",
     "Clue 2 Rate-UP",

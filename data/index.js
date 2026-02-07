@@ -1,15 +1,15 @@
 // Central data export
-// Import from here: import { ZONES, ATTRIBUTES, ... } from '../../data/index.js'
+// Import from here: import { ESSENCE_ZONES, ATTRIBUTES, ... } from '../../data/index.js'
 
-export { ZONES } from './zones.js';
+export { ESSENCE_ZONES } from './zones.js';
 export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL } from './constants.js';
-export { CHARACTERS, CABINS, STAT_TYPES } from './characters.js';
+export { CHARACTERS, CABINS, SHIP_STAT_TYPES } from './characters.js';
 
 // Derived data
-import { ZONES } from './zones.js';
+import { ESSENCE_ZONES } from './zones.js';
 
 // All unique secondaries across all zones (sorted)
-export const ALL_SECONDARIES = [...new Set(Object.values(ZONES).flatMap(z => z.secondaries))].sort();
+export const ALL_SECONDARIES = [...new Set(Object.values(ESSENCE_ZONES).flatMap(z => z.secondaries))].sort();
 
 // All unique skills across all zones (sorted)
-export const ALL_SKILLS = [...new Set(Object.values(ZONES).flatMap(z => z.skills))].sort();
+export const ALL_SKILLS = [...new Set(Object.values(ESSENCE_ZONES).flatMap(z => z.skills))].sort();

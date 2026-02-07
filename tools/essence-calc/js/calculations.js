@@ -1,8 +1,8 @@
-import { ZONES, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
+import { ESSENCE_ZONES, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
 
 export function getValidZonesForEssence(essence) {
   const valid = [];
-  for (const [zoneId, zone] of Object.entries(ZONES)) {
+  for (const [zoneId, zone] of Object.entries(ESSENCE_ZONES)) {
     if (zone.secondaries.includes(essence.secondary) && zone.skills.includes(essence.skill)) {
       valid.push(zoneId);
     }
@@ -11,7 +11,7 @@ export function getValidZonesForEssence(essence) {
 }
 
 export function getZoneConfigurations(zoneId, essences) {
-  const zone = ZONES[zoneId];
+  const zone = ESSENCE_ZONES[zoneId];
   const secPool = zone.secondaries.length;
   const skillPool = zone.skills.length;
   const configs = [];
