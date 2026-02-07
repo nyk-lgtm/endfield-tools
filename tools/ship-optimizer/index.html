@@ -56,6 +56,12 @@
     <div class="modal">
       <button class="modal-close">&times;</button>
       <h2>Math</h2>
+      
+      <p><strong>Optimization</strong></p>
+      <p>The algorithm iterates over all possible and meaningful Control Nexus permutations, it then fills other rooms based on the following heuristic:</p>
+      <p><code>score = production_bonus + (uptime_gain * 2.2)</code><p>
+      <p>This comes from the fact that baseline production is 220% assuming the room is filled with 3 non-matching operators. This is why I count every 1% uptime gain as 2.2% effective production gain.</p>
+      <p>This gives us a good enough starting point from which we can then try to further optimize by exhaustive search until the score is no longer improving.</p> 	
 
       <p><strong>Efficiency Calculation</strong></p>
       <p>Base efficiency depends on operators in room:</p>
