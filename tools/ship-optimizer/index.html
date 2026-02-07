@@ -26,8 +26,10 @@
     <div class="card">
       <h2>Available Characters</h2>
       <div class="character-controls">
-        <button id="selectAll" class="btn-secondary">Select All</button>
-        <button id="selectNone" class="btn-secondary">Select None</button>
+        <button id="selectAll" class="btn btn-secondary">Select All</button>
+        <button id="selectNone" class="btn btn-secondary">Select None</button>
+        <button id="optimizeBtn" class="btn btn-primary">Optimize</button>
+        <span id="optimizeProgress" class="optimize-progress"></span>
         <div class="global-elite-controls">
           <span class="global-elite-label">Set all to:</span>
           <button class="global-elite-btn" data-level="e1">E1</button>
@@ -39,12 +41,6 @@
       <div id="characterList" class="character-list">
         <!-- Characters rendered by JS -->
       </div>
-    </div>
-
-    <!-- Optimize Button -->
-    <div class="optimize-section">
-      <button id="optimizeBtn" class="btn-primary">Optimize Ship Layout</button>
-      <span id="optimizeProgress" class="optimize-progress"></span>
     </div>
 
     <!-- Results -->

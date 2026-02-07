@@ -53,6 +53,7 @@ select:focus, input[type="number"]:focus {
 }
 
 .btn-primary:hover { background: #2a2a1a; border-color: #feff42; }
+.btn-primary:disabled { background: #111111; color: #444444; border-color: #222222; cursor: not-allowed; }
 
 .btn-secondary {
   background: #1a1a1a;
@@ -214,6 +215,10 @@ td { padding: 8px 12px; color: #cccccc; border-bottom: 1px solid #1a1a1a; }
 }
 
 .toggle-btn:not(.active):hover { border-color: #444444; color: #cccccc; }
+
+/* Title row */
+.title-row { display: flex; align-items: center; justify-content: space-between; }
+.title-row h1 { margin: 0; }
 
 /* Utility */
 .text-error { color: #ff6666; }

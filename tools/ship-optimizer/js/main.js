@@ -143,7 +143,7 @@ async function handleOptimize() {
   const results = await optimizeLayout(selectedChars, rooms, roomTargets, onProgress);
 
   btn.disabled = false;
-  btn.textContent = 'Optimize Ship Layout';
+  btn.textContent = 'Optimize';
   progress.textContent = '';
 
   setResults(results);

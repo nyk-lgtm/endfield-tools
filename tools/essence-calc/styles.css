@@ -197,10 +197,6 @@
 /* Error message */
 .no-zones-msg { color: #ff6666; font-size: 13px; padding: 12px; background: #1a1a1a; border-radius: 6px; }
 
-/* Title row */
-.title-row { display: flex; align-items: center; justify-content: space-between; }
-.title-row h1 { margin: 0; }
-
 /* Plan header */
 .plan-header {
   display: flex;
