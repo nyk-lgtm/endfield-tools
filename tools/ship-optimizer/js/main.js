@@ -18,6 +18,7 @@ import {
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
 import { optimizeLayout } from './calculations.js';
 import { initHelpModal } from '../../../shared/modal.js';
+import { initNav } from '../../../shared/nav.js';
 
 // DOM element cache
 const elements = {
@@ -148,6 +149,7 @@ async function handleOptimize() {
 function init() {
   cacheElements();
 
+  initNav();
   initHelpModal();
 
   // Room configuration (event delegation)

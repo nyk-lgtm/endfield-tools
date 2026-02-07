@@ -13,6 +13,7 @@ import {
 } from './ui.js';
 import { getBuilds } from './state.js';
 import { initHelpModal } from '../../../shared/modal.js';
+import { initNav } from '../../../shared/nav.js';
 
 function recalculate() {
   if (getCurrentMode() === 'multi') {
@@ -88,6 +89,7 @@ function init() {
     recalculate();
   });
 
+  initNav();
   initHelpModal();
 
   // Initial render

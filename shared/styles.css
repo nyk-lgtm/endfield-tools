@@ -81,6 +81,23 @@ select:focus, input[type="number"]:focus {
 
 .btn-icon:hover { border-color: #feff42; color: #feff42; }
 
+.home-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  color: #888888;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.home-btn:hover { border-color: #feff42; color: #feff42; }
+
 /* Cards */
 .card {
   background: #141414;
