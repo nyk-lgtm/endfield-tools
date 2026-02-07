@@ -176,13 +176,6 @@
   background: #1a1a0a;
 }
 
-.character-item input[type="checkbox"] {
-  accent-color: #feff42;
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-}
-
 .character-info {
   flex: 1;
   min-width: 0;
@@ -308,7 +301,6 @@
 
 .result-operator {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   padding: 8px 12px;
   background: #0a0a0a;
@@ -317,6 +309,10 @@
 
 .result-operator-name {
   color: #e0e0e0;
+  width: 100px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .result-operator-elite {
@@ -325,11 +321,13 @@
   background: #252525;
   padding: 3px 8px;
   border-radius: 3px;
+  margin-left: auto;
 }
 
 .result-operator-stat {
   font-size: 13px;
   color: #feff42;
+  margin-left: auto;
 }
 
 .result-empty-slot {
@@ -339,6 +337,22 @@
 }
 
 /* Drag-and-drop */
+.drag-handle {
+  color: #444;
+  font-size: 16px;
+  cursor: grab;
+  user-select: none;
+  line-height: 1;
+  width: 18px;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.result-operator:hover .drag-handle,
+.character-item:hover .drag-handle {
+  color: #888;
+}
+
 .result-operator[draggable] {
   cursor: grab;
 }

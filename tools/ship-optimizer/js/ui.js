@@ -91,7 +91,7 @@ export function renderCharacterList(container) {
 
     return `
       <div class="character-item${selected ? ' selected' : ''}" draggable="true" data-name="${name}">
-        <input type="checkbox" ${selected ? 'checked' : ''} tabindex="-1">
+        <span class="drag-handle">⠿</span>
         <div class="character-info">
           <div class="character-name">${name}</div>
           <div class="character-talents">${cabinSummary}</div>
@@ -128,6 +128,7 @@ export function renderResults(container, resultsCard) {
             .join(', ');
           return `
             <div class="result-operator" draggable="true" data-room-index="${i}" data-slot="${j}">
+              <span class="drag-handle">⠿</span>
               <span class="result-operator-name">${op.name}</span>
               <span class="result-operator-stat">${statsHtml}</span>
               <span class="result-operator-elite">${op.elite.toUpperCase()}</span>
