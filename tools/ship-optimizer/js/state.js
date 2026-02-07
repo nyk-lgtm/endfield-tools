@@ -32,7 +32,11 @@ let state = {
   // Selected character names (Set-like object)
   selectedCharacters: {},
   // Optimization results
-  results: null
+  results: null,
+  // Raw assignment for drag-and-drop recalculation
+  assignment: null,
+  // Config used for optimization (for recalculation)
+  optimizerConfig: null
 };
 
 export function getState() {
@@ -117,4 +121,20 @@ export function getResults() {
 
 export function setResults(results) {
   state.results = results;
+}
+
+export function getAssignment() {
+  return state.assignment;
+}
+
+export function setAssignment(assignment) {
+  state.assignment = assignment;
+}
+
+export function getOptimizerConfig() {
+  return state.optimizerConfig;
+}
+
+export function setOptimizerConfig(config) {
+  state.optimizerConfig = config;
 }

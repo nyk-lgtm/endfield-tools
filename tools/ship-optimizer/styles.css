@@ -340,6 +340,38 @@
   padding: 8px 12px;
 }
 
+/* Drag-and-drop */
+.result-operator[draggable] {
+  cursor: grab;
+}
+
+.result-operator.dragging {
+  opacity: 0.4;
+}
+
+.result-room.drag-over {
+  border-color: #feff42;
+}
+
+.result-operator.drag-over {
+  outline: 2px solid #feff42;
+  outline-offset: -2px;
+}
+
+.result-drop-zone {
+  display: none;
+  padding: 8px 12px;
+  border: 2px dashed #444;
+  border-radius: 4px;
+  color: #555;
+  text-align: center;
+  font-size: 13px;
+}
+
+.results-grid:has(.dragging) .result-drop-zone {
+  display: block;
+}
+
 /* Summary Stats */
 .results-summary {
   margin-top: 16px;

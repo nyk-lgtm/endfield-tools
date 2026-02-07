@@ -118,9 +118,9 @@ export function renderResults(container, resultsCard) {
 
   resultsCard.style.display = 'block';
 
-  const roomsHtml = results.rooms.map(room => {
+  const roomsHtml = results.rooms.map((room, i) => {
     const operatorsHtml = room.operators.length > 0
-      ? room.operators.map(op => {
+      ? room.operators.map((op, j) => {
           const statsHtml = op.stats
             .map(s => {
               if (!s.value) return s.stat;
@@ -129,7 +129,7 @@ export function renderResults(container, resultsCard) {
             })
             .join(', ');
           return `
-            <div class="result-operator">
+            <div class="result-operator" draggable="true" data-room-index="${i}" data-slot="${j}">
               <span class="result-operator-name">${op.name}</span>
               <span class="result-operator-stat">${statsHtml}</span>
               <span class="result-operator-elite">${op.elite.toUpperCase()}</span>
@@ -137,6 +137,10 @@ export function renderResults(container, resultsCard) {
           `;
         }).join('')
       : '<div class="result-empty-slot">No operators assigned</div>';
+
+    const dropZoneHtml = room.operators.length < 3
+      ? `<div class="result-drop-zone" data-room-index="${i}">Drop here</div>`
+      : '';
 
     let efficiencyHtml = '';
     if (room.efficiencyByProduct) {
@@ -156,7 +160,7 @@ export function renderResults(container, resultsCard) {
       : '';
 
     return `
-      <div class="result-room">
+      <div class="result-room" data-room-index="${i}">
         <div class="result-room-header">
           <div class="result-room-title">
             <span class="result-room-name">${room.name}</span>
@@ -166,6 +170,7 @@ export function renderResults(container, resultsCard) {
         </div>
         <div class="result-operators">
           ${operatorsHtml}
+          ${dropZoneHtml}
         </div>
       </div>
     `;

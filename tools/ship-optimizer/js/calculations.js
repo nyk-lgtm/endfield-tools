@@ -578,7 +578,7 @@ export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}
 /**
  * Build the results object for display
  */
-function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsMade) {
+export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsMade) {
   const controlNexusIndex = rooms.indexOf('Control Nexus');
   const { moodRegen: globalMoodRegen } = getRoomStats(
     assignment[controlNexusIndex] || [], 'Control Nexus', null, eliteLevels

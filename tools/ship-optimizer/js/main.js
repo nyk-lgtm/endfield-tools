@@ -13,10 +13,14 @@ import {
   setEliteLevel,
   setAllEliteLevels,
   getSelectedCharactersWithElite,
-  setResults
+  setResults,
+  getAssignment,
+  setAssignment,
+  getOptimizerConfig,
+  setOptimizerConfig
 } from './state.js';
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
-import { optimizeLayout } from './calculations.js';
+import { optimizeLayout, buildResults } from './calculations.js';
 import { initHelpModal } from '../../../shared/modal.js';
 import { initNav } from '../../../shared/nav.js';
 
@@ -142,6 +146,100 @@ async function handleOptimize() {
   btn.textContent = 'Optimize';
   progress.textContent = '';
 
+  // Store raw assignment for drag-and-drop recalculation
+  const assignment = results.rooms.map(r => r.operators.map(op => op.name));
+  setAssignment(assignment);
+  setOptimizerConfig({ rooms: [...rooms], roomTargets: { ...roomTargets }, eliteLevels: { ...selectedChars } });
+
+  setResults(results);
+  renderResults(elements.resultsContainer, elements.resultsCard);
+}
+
+// Drag-and-drop handlers for result operators
+function handleDragStart(e) {
+  const op = e.target.closest('.result-operator[draggable]');
+  if (!op) return;
+  op.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', JSON.stringify({
+    roomIndex: parseInt(op.dataset.roomIndex),
+    slot: parseInt(op.dataset.slot)
+  }));
+}
+
+function handleDragEnd(e) {
+  const op = e.target.closest('.result-operator[draggable]');
+  if (op) op.classList.remove('dragging');
+  // Clean up all highlights
+  elements.resultsContainer.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+}
+
+function handleDragOver(e) {
+  const target = e.target.closest('.result-operator[draggable], .result-drop-zone');
+  if (!target) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  // Highlight the target
+  elements.resultsContainer.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  if (target.classList.contains('result-drop-zone')) {
+    target.closest('.result-room').classList.add('drag-over');
+  } else {
+    target.classList.add('drag-over');
+  }
+}
+
+function handleDragLeave(e) {
+  const target = e.target.closest('.result-operator[draggable], .result-drop-zone');
+  if (!target) return;
+  // Only remove if we're actually leaving (not entering a child)
+  if (!target.contains(e.relatedTarget)) {
+    target.classList.remove('drag-over');
+    if (target.classList.contains('result-drop-zone')) {
+      target.closest('.result-room').classList.remove('drag-over');
+    }
+  }
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  elements.resultsContainer.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+
+  const sourceData = JSON.parse(e.dataTransfer.getData('text/plain'));
+  const srcRoom = sourceData.roomIndex;
+  const srcSlot = sourceData.slot;
+
+  const assignment = getAssignment();
+  if (!assignment) return;
+
+  const dropTarget = e.target.closest('.result-operator[draggable], .result-drop-zone');
+  if (!dropTarget) return;
+
+  if (dropTarget.classList.contains('result-drop-zone')) {
+    // Move to room (drop zone)
+    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+    if (dstRoom === srcRoom) return;
+    if (assignment[dstRoom].length >= 3) return;
+
+    // Move operator from source to destination
+    const operator = assignment[srcRoom].splice(srcSlot, 1)[0];
+    assignment[dstRoom].push(operator);
+  } else {
+    // Swap with another operator
+    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+    const dstSlot = parseInt(dropTarget.dataset.slot);
+    if (dstRoom === srcRoom) return;
+
+    // Swap
+    const temp = assignment[srcRoom][srcSlot];
+    assignment[srcRoom][srcSlot] = assignment[dstRoom][dstSlot];
+    assignment[dstRoom][dstSlot] = temp;
+  }
+
+  // Recalculate and re-render
+  const config = getOptimizerConfig();
+  const results = buildResults(assignment, config.rooms, config.roomTargets, config.eliteLevels, 0);
+  setAssignment(assignment);
   setResults(results);
   renderResults(elements.resultsContainer, elements.resultsCard);
 }
@@ -176,6 +274,13 @@ function init() {
 
   // Optimize button
   document.getElementById('optimizeBtn').addEventListener('click', handleOptimize);
+
+  // Drag-and-drop on results
+  elements.resultsContainer.addEventListener('dragstart', handleDragStart);
+  elements.resultsContainer.addEventListener('dragend', handleDragEnd);
+  elements.resultsContainer.addEventListener('dragover', handleDragOver);
+  elements.resultsContainer.addEventListener('dragleave', handleDragLeave);
+  elements.resultsContainer.addEventListener('drop', handleDrop);
 
   // Initial render
   renderRoomConfig(elements.roomConfig);
