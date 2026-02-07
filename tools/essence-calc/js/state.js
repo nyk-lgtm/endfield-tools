@@ -1,6 +1,5 @@
 import { ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS } from '../../../data/index.js';
 
-// Application state
 let plannerBuilds = [
   { attribute: "Agility", secondary: "Attack", skill: "Flow" },
 ];

@@ -1,5 +1,3 @@
-// Ship Optimizer state management
-
 import { CHARACTERS } from '../../../data/index.js';
 
 // Initialize elite levels for all characters (default to 'max')
@@ -11,7 +9,6 @@ function initEliteLevels() {
   return levels;
 }
 
-// Application state
 let state = {
   // Room configuration: [Control Nexus, Reception Room, room3, room4, room5]
   rooms: [
@@ -31,7 +28,6 @@ let state = {
   eliteLevels: initEliteLevels(),
   // Selected character names (Set-like object)
   selectedCharacters: {},
-  // Optimization results
   results: null,
   // Raw assignment for drag-and-drop recalculation
   assignment: null,
@@ -104,6 +100,10 @@ export function setAllEliteLevels(level) {
   for (const name of Object.keys(CHARACTERS)) {
     state.eliteLevels[name] = level;
   }
+}
+
+export function getAllEliteLevels() {
+  return { ...state.eliteLevels };
 }
 
 // Get selected characters with their elite levels (for optimizer)

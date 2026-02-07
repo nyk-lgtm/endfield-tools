@@ -17,7 +17,8 @@ import {
   getAssignment,
   setAssignment,
   getOptimizerConfig,
-  setOptimizerConfig
+  setOptimizerConfig,
+  getAllEliteLevels
 } from './state.js';
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
 import { optimizeLayout, buildResults } from './calculations.js';
@@ -149,29 +150,44 @@ async function handleOptimize() {
   // Store raw assignment for drag-and-drop recalculation
   const assignment = results.rooms.map(r => r.operators.map(op => op.name));
   setAssignment(assignment);
-  setOptimizerConfig({ rooms: [...rooms], roomTargets: { ...roomTargets }, eliteLevels: { ...selectedChars } });
+  setOptimizerConfig({ rooms: [...rooms], roomTargets: { ...roomTargets }, eliteLevels: getAllEliteLevels() });
 
   setResults(results);
   renderResults(elements.resultsContainer, elements.resultsCard);
 }
 
-// Drag-and-drop handlers for result operators
-function handleDragStart(e) {
+// Drag-and-drop handlers for result operators and character list
+function handleResultDragStart(e) {
   const op = e.target.closest('.result-operator[draggable]');
   if (!op) return;
   op.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', JSON.stringify({
+    type: 'result',
     roomIndex: parseInt(op.dataset.roomIndex),
     slot: parseInt(op.dataset.slot)
   }));
 }
 
+function handleCharacterDragStart(e) {
+  const item = e.target.closest('.character-item[draggable]');
+  if (!item || !getAssignment()) return;
+  if (e.target.classList.contains('elite-btn')) { e.preventDefault(); return; }
+  item.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', JSON.stringify({
+    type: 'character',
+    name: item.dataset.name
+  }));
+  // Show drop zones
+  elements.resultsContainer.querySelectorAll('.result-drop-zone').forEach(z => z.classList.add('visible'));
+}
+
 function handleDragEnd(e) {
-  const op = e.target.closest('.result-operator[draggable]');
-  if (op) op.classList.remove('dragging');
-  // Clean up all highlights
+  const el = e.target.closest('.result-operator[draggable], .character-item[draggable]');
+  if (el) el.classList.remove('dragging');
   elements.resultsContainer.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
+  elements.resultsContainer.querySelectorAll('.result-drop-zone.visible').forEach(z => z.classList.remove('visible'));
 }
 
 function handleDragOver(e) {
@@ -201,13 +217,20 @@ function handleDragLeave(e) {
   }
 }
 
+function removeFromAssignment(assignment, name) {
+  for (let i = 0; i < assignment.length; i++) {
+    const idx = assignment[i].indexOf(name);
+    if (idx !== -1) {
+      assignment[i].splice(idx, 1);
+      return true;
+    }
+  }
+  return false;
+}
+
 function handleDrop(e) {
   e.preventDefault();
   elements.resultsContainer.querySelectorAll('.drag-over').forEach(el => el.classList.remove('drag-over'));
-
-  const sourceData = JSON.parse(e.dataTransfer.getData('text/plain'));
-  const srcRoom = sourceData.roomIndex;
-  const srcSlot = sourceData.slot;
 
   const assignment = getAssignment();
   if (!assignment) return;
@@ -215,25 +238,43 @@ function handleDrop(e) {
   const dropTarget = e.target.closest('.result-operator[draggable], .result-drop-zone');
   if (!dropTarget) return;
 
-  if (dropTarget.classList.contains('result-drop-zone')) {
-    // Move to room (drop zone)
-    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
-    if (dstRoom === srcRoom) return;
-    if (assignment[dstRoom].length >= 3) return;
+  const sourceData = JSON.parse(e.dataTransfer.getData('text/plain'));
 
-    // Move operator from source to destination
-    const operator = assignment[srcRoom].splice(srcSlot, 1)[0];
-    assignment[dstRoom].push(operator);
+  if (sourceData.type === 'character') {
+    // Dragging from character list
+    const name = sourceData.name;
+    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+
+    if (assignment[dstRoom].includes(name)) return;
+    removeFromAssignment(assignment, name);
+
+    if (dropTarget.classList.contains('result-drop-zone')) {
+      if (assignment[dstRoom].length >= 3) return;
+      assignment[dstRoom].push(name);
+    } else {
+      // Drop on operator → replace them
+      const dstSlot = parseInt(dropTarget.dataset.slot);
+      assignment[dstRoom][dstSlot] = name;
+    }
   } else {
-    // Swap with another operator
-    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
-    const dstSlot = parseInt(dropTarget.dataset.slot);
-    if (dstRoom === srcRoom) return;
+    // Dragging from results (room-to-room)
+    const srcRoom = sourceData.roomIndex;
+    const srcSlot = sourceData.slot;
 
-    // Swap
-    const temp = assignment[srcRoom][srcSlot];
-    assignment[srcRoom][srcSlot] = assignment[dstRoom][dstSlot];
-    assignment[dstRoom][dstSlot] = temp;
+    if (dropTarget.classList.contains('result-drop-zone')) {
+      const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+      if (dstRoom === srcRoom) return;
+      if (assignment[dstRoom].length >= 3) return;
+      const operator = assignment[srcRoom].splice(srcSlot, 1)[0];
+      assignment[dstRoom].push(operator);
+    } else {
+      const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+      const dstSlot = parseInt(dropTarget.dataset.slot);
+      if (dstRoom === srcRoom) return;
+      const temp = assignment[srcRoom][srcSlot];
+      assignment[srcRoom][srcSlot] = assignment[dstRoom][dstSlot];
+      assignment[dstRoom][dstSlot] = temp;
+    }
   }
 
   // Recalculate and re-render
@@ -276,11 +317,15 @@ function init() {
   document.getElementById('optimizeBtn').addEventListener('click', handleOptimize);
 
   // Drag-and-drop on results
-  elements.resultsContainer.addEventListener('dragstart', handleDragStart);
+  elements.resultsContainer.addEventListener('dragstart', handleResultDragStart);
   elements.resultsContainer.addEventListener('dragend', handleDragEnd);
   elements.resultsContainer.addEventListener('dragover', handleDragOver);
   elements.resultsContainer.addEventListener('dragleave', handleDragLeave);
   elements.resultsContainer.addEventListener('drop', handleDrop);
+
+  // Drag from character list into results
+  elements.characterList.addEventListener('dragstart', handleCharacterDragStart);
+  elements.characterList.addEventListener('dragend', handleDragEnd);
 
   // Initial render
   renderRoomConfig(elements.roomConfig);

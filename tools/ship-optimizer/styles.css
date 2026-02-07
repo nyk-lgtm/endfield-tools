@@ -1,5 +1,3 @@
-/* Ship Optimizer specific styles */
-
 .hint {
   color: #888;
   font-size: 14px;
@@ -345,7 +343,8 @@
   cursor: grab;
 }
 
-.result-operator.dragging {
+.result-operator.dragging,
+.character-item.dragging {
   opacity: 0.4;
 }
 
@@ -368,7 +367,8 @@
   font-size: 13px;
 }
 
-.results-grid:has(.dragging) .result-drop-zone {
+.results-grid:has(.dragging) .result-drop-zone,
+.result-drop-zone.visible {
   display: block;
 }
 

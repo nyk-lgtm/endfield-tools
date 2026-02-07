@@ -1,5 +1,3 @@
-// Ship Optimizer calculations and optimization logic
-
 import { CHARACTERS } from '../../../data/index.js';
 
 // Base rates
@@ -138,14 +136,12 @@ function calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevel
 
     const { slowMoodDrop } = getRoomStats(operators, roomType, target, eliteLevels);
 
-    // Handle multi-product rooms correctly
     const targetArray = target
       ? (Array.isArray(target) ? target : [target])
       : (PRODUCTION_STATS[roomType] || []);
 
     let roomEffective = 0;
     if (targetArray.length > 1) {
-      // Multiple products - average their efficiencies
       for (const product of targetArray) {
         let productBonus = 0;
         for (const charName of operators) {
@@ -159,7 +155,6 @@ function calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevel
       }
       roomEffective /= targetArray.length; // Average
     } else {
-      // Single product
       const { productionBonus } = getRoomStats(operators, roomType, target, eliteLevels);
       const { effective } = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
       roomEffective = effective;
@@ -375,7 +370,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             if (rooms[roomA] === 'Control Nexus' && !hasMatchingTalent(charB, 'Control Nexus', eliteLevels[charB])) continue;
             if (rooms[roomB] === 'Control Nexus' && !hasMatchingTalent(charA, 'Control Nexus', eliteLevels[charA])) continue;
 
-            // Try swapping
             assignment[roomA][slotA] = charB;
             assignment[roomB][slotB] = charA;
 
@@ -388,7 +382,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
               improved = true;
               swapsMade++;
             } else {
-              // Revert swap
               assignment[roomA][slotA] = charA;
               assignment[roomB][slotB] = charB;
             }
@@ -426,7 +419,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             if (targetRoomType === 'Control Nexus' && !hasMatchingTalent(assignedChar, 'Control Nexus', eliteLevels[assignedChar])) continue;
 
             if (assignment[targetRoom].length < 3) {
-              // Room has space, try adding
               assignment[targetRoom].push(assignedChar);
 
               const { totalEfficiency: effWithPlacement } = calculateTotalShipEfficiency(
@@ -459,7 +451,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             }
           }
 
-          // Check if this replacement improves things
           if (bestNewEfficiency > bestEfficiency + 0.01) {
             // Apply the best placement for the freed char
             if (bestPlacement) {
@@ -503,7 +494,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
           // Don't move non-matching chars INTO Control Nexus
           if (rooms[roomB] === 'Control Nexus' && !hasMatchingTalent(charA, 'Control Nexus', eliteLevels[charA])) continue;
 
-          // Try moving
           assignment[roomA].splice(slotA, 1);
           assignment[roomB].push(charA);
 
@@ -516,7 +506,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             improved = true;
             swapsMade++;
           } else {
-            // Revert move
             assignment[roomB].pop();
             assignment[roomA].splice(slotA, 0, charA);
           }
@@ -555,7 +544,6 @@ export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}
       initialAssignment, rooms, roomTargets, selectedCharacters
     );
 
-    // Track the best result
     if (finalEfficiency > bestEfficiency) {
       bestEfficiency = finalEfficiency;
       bestAssignment = assignment;
@@ -571,7 +559,6 @@ export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}
     }
   }
 
-  // Build results
   return buildResults(bestAssignment, rooms, roomTargets, selectedCharacters, totalSwapsMade);
 }
 
@@ -634,7 +621,6 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
       const targetArray = target ? (Array.isArray(target) ? target : [target]) : relevantStats;
 
       if (targetArray.length > 1) {
-        // Multiple products - calculate efficiency for each
         efficiencyByProduct = {};
         for (const product of targetArray) {
           // Sum only bonuses for this specific product
@@ -654,7 +640,6 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
         const effValues = Object.values(efficiencyByProduct);
         efficiency = effValues.reduce((a, b) => a + b, 0) / effValues.length;
       } else {
-        // Single product - simple calculation
         const eff = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
         efficiency = eff.effective;
       }

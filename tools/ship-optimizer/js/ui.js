@@ -1,5 +1,3 @@
-// Ship Optimizer UI rendering
-
 import { CHARACTERS } from '../../../data/index.js';
 import {
   getRooms,
@@ -92,7 +90,7 @@ export function renderCharacterList(container) {
     }).join('');
 
     return `
-      <div class="character-item${selected ? ' selected' : ''}" data-name="${name}">
+      <div class="character-item${selected ? ' selected' : ''}" draggable="true" data-name="${name}">
         <input type="checkbox" ${selected ? 'checked' : ''} tabindex="-1">
         <div class="character-info">
           <div class="character-name">${name}</div>
