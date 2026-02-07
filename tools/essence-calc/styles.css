@@ -111,14 +111,6 @@
 .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; }
 
 /* Plan display */
-.plan-zone {
-  background: #141414;
-  border: 1px solid #2a2a2a;
-  border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 16px;
-}
-
 .plan-zone-name {
   color: #ffffff;
   font-size: 18px;
@@ -137,10 +129,6 @@
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  background: #1a1a1a;
-  border: 1px solid #2a2a2a;
-  border-radius: 8px;
-  padding: 14px;
 }
 
 .plan-config-left {

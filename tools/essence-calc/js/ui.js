@@ -20,8 +20,7 @@ const elements = {
   modeSingle: null,
   modeMulti: null,
   singleModeResults: null,
-  multiModeResults: null,
-  helpModal: null
+  multiModeResults: null
 };
 
 export function cacheElements() {
@@ -35,7 +34,6 @@ export function cacheElements() {
   elements.modeMulti = document.getElementById('modeMulti');
   elements.singleModeResults = document.getElementById('singleModeResults');
   elements.multiModeResults = document.getElementById('multiModeResults');
-  elements.helpModal = document.getElementById('helpModal');
 }
 
 export function getVal(id) {
@@ -184,7 +182,7 @@ export function renderMultiZonePlan(onSelectZone) {
       const ticketText = p.ticket === 'none' ? 'No ticket' : `Lock ${p.stat}`;
 
       return `
-        <div class="plan-config">
+        <div class="card-sm plan-config">
           <div class="plan-config-left">
             <div class="plan-config-ticket">${ticketText}</div>
             <div class="plan-essences">
@@ -201,7 +199,7 @@ export function renderMultiZonePlan(onSelectZone) {
     }).join('');
 
     return `
-      <div class="plan-zone">
+      <div class="card plan-zone">
         <div class="plan-zone-name">${zone.name}</div>
         <div class="plan-configs">
           ${configsHtml}
@@ -338,6 +336,3 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   });
 }
 
-export function toggleModal(open) {
-  elements.helpModal.classList.toggle('open', open);
-}

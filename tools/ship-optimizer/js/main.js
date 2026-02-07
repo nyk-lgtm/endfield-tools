@@ -17,10 +17,10 @@ import {
 } from './state.js';
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
 import { optimizeLayout } from './calculations.js';
+import { initHelpModal } from '../../../shared/modal.js';
 
 // DOM element cache
 const elements = {
-  helpModal: null,
   roomConfig: null,
   characterList: null,
   resultsCard: null,
@@ -28,15 +28,10 @@ const elements = {
 };
 
 function cacheElements() {
-  elements.helpModal = document.getElementById('helpModal');
   elements.roomConfig = document.getElementById('roomConfig');
   elements.characterList = document.getElementById('characterList');
   elements.resultsCard = document.getElementById('resultsCard');
   elements.resultsContainer = document.getElementById('resultsContainer');
-}
-
-function toggleModal(open) {
-  elements.helpModal.classList.toggle('open', open);
 }
 
 function handleCharacterClick(e) {
@@ -153,15 +148,7 @@ async function handleOptimize() {
 function init() {
   cacheElements();
 
-  // Help modal
-  document.querySelector('.help-btn').addEventListener('click', () => toggleModal(true));
-  elements.helpModal.addEventListener('click', (e) => {
-    if (e.target.id === 'helpModal') toggleModal(false);
-  });
-  document.querySelector('.modal-close').addEventListener('click', () => toggleModal(false));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') toggleModal(false);
-  });
+  initHelpModal();
 
   // Room configuration (event delegation)
   elements.roomConfig.addEventListener('change', handleRoomTypeChange);

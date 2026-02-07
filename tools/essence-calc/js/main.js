@@ -9,9 +9,10 @@ import {
 import { ESSENCE_ZONES } from '../../../data/index.js';
 import {
   cacheElements, renderBuilds, renderModeToggle,
-  renderMultiZonePlan, renderSingleZoneCalc, toggleModal, getVal
+  renderMultiZonePlan, renderSingleZoneCalc, getVal
 } from './ui.js';
 import { getBuilds } from './state.js';
+import { initHelpModal } from '../../../shared/modal.js';
 
 function recalculate() {
   if (getCurrentMode() === 'multi') {
@@ -87,15 +88,7 @@ function init() {
     recalculate();
   });
 
-  // Help modal
-  document.querySelector('.help-btn').addEventListener('click', () => toggleModal(true));
-  document.getElementById('helpModal').addEventListener('click', (e) => {
-    if (e.target.id === 'helpModal') toggleModal(false);
-  });
-  document.querySelector('.modal-close').addEventListener('click', () => toggleModal(false));
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') toggleModal(false);
-  });
+  initHelpModal();
 
   // Initial render
   renderBuilds(handleUpdateBuild, handleRemoveBuild);
