@@ -208,13 +208,11 @@ function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
   const assignment = rooms.map(() => []);
   const controlNexusIndex = rooms.indexOf('Control Nexus');
 
-  // Set the fixed Nexus configuration
   assignment[controlNexusIndex] = [...fixedNexus];
   for (const char of fixedNexus) {
     availableChars.delete(char);
   }
 
-  // Calculate global mood regen
   let globalMoodRegen = 0;
   for (const charName of assignment[controlNexusIndex]) {
     const talents = getCharacterTalentsForCabin(charName, 'Control Nexus', selectedCharacters[charName]);
@@ -223,7 +221,6 @@ function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
     }
   }
 
-  // Assign other rooms
   for (let i = 0; i < rooms.length; i++) {
     if (i === controlNexusIndex) continue;
     assignRoomGreedy(i, rooms[i], assignment, availableChars, selectedCharacters, globalMoodRegen, roomTargets[i]);
@@ -327,29 +324,91 @@ function generateNexusConfigs(nexusCandidates) {
 }
 
 /**
+ * Calculate effective efficiency for a single room given global mood regen
+ */
+function calcRoomEffective(roomIndex, assignment, rooms, roomTargets, eliteLevels, globalMoodRegen) {
+  const roomType = rooms[roomIndex];
+  const operators = assignment[roomIndex] || [];
+  const target = roomTargets[roomIndex];
+
+  if (roomType === 'Control Nexus') return 0;
+
+  const { slowMoodDrop } = getRoomStats(operators, roomType, target, eliteLevels);
+
+  const targetArray = target
+    ? (Array.isArray(target) ? target : [target])
+    : (PRODUCTION_STATS[roomType] || []);
+
+  let roomEffective = 0;
+  if (targetArray.length > 1) {
+    for (const product of targetArray) {
+      let productBonus = 0;
+      for (const charName of operators) {
+        const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
+        for (const t of talents) {
+          if (t.stat === product) productBonus += t.value;
+        }
+      }
+      const { effective } = calculateRoomEfficiency(operators.length, productBonus, slowMoodDrop, globalMoodRegen);
+      roomEffective += effective;
+    }
+    roomEffective /= targetArray.length;
+  } else {
+    const { productionBonus } = getRoomStats(operators, roomType, target, eliteLevels);
+    const { effective } = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
+    roomEffective = effective;
+  }
+
+  return roomEffective;
+}
+
+/**
  * Phase 2: Iterative improvement via swaps
- * Try swapping characters between rooms and with unassigned pool to improve total efficiency
+ * Uses delta evaluation: only recalculates affected rooms unless Control Nexus is involved
  */
 function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIterations = 100) {
   let improved = true;
   let iterations = 0;
   let swapsMade = 0;
-  let { totalEfficiency: bestEfficiency } = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels);
+  const controlNexusIndex = rooms.indexOf('Control Nexus');
 
-  // Build set of assigned characters
-  const getAssignedChars = () => {
-    const assigned = new Set();
-    for (const roomOps of assignment) {
-      for (const char of roomOps) {
-        assigned.add(char);
+  const { globalMoodRegen } = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels);
+  let cachedMoodRegen = globalMoodRegen;
+  const roomEffCache = rooms.map((_, i) => calcRoomEffective(i, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen));
+  let bestEfficiency = roomEffCache.reduce((sum, e) => sum + e, 0);
+
+  function evalSwap(affectedRooms) {
+    if (affectedRooms.includes(controlNexusIndex)) {
+      const result = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels);
+      return { efficiency: result.totalEfficiency, moodRegen: result.globalMoodRegen };
+    }
+    let newTotal = bestEfficiency;
+    for (const ri of affectedRooms) {
+      const oldEff = roomEffCache[ri];
+      const newEff = calcRoomEffective(ri, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
+      newTotal += newEff - oldEff;
+    }
+    return { efficiency: newTotal, moodRegen: cachedMoodRegen };
+  }
+
+  function commitSwap(affectedRooms, newEfficiency, newMoodRegen) {
+    bestEfficiency = newEfficiency;
+    cachedMoodRegen = newMoodRegen;
+    for (const ri of affectedRooms) {
+      roomEffCache[ri] = calcRoomEffective(ri, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
+    }
+    if (affectedRooms.includes(controlNexusIndex)) {
+      for (let i = 0; i < rooms.length; i++) {
+        roomEffCache[i] = calcRoomEffective(i, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
       }
     }
-    return assigned;
-  };
+  }
 
-  // Get unassigned characters
   const getUnassignedChars = () => {
-    const assigned = getAssignedChars();
+    const assigned = new Set();
+    for (const roomOps of assignment) {
+      for (const char of roomOps) assigned.add(char);
+    }
     return Object.keys(eliteLevels).filter(name => !assigned.has(name));
   };
 
@@ -357,7 +416,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
     improved = false;
     iterations++;
 
-    // Try all possible swaps between rooms
     for (let roomA = 0; roomA < rooms.length; roomA++) {
       for (let roomB = roomA + 1; roomB < rooms.length; roomB++) {
         for (let slotA = 0; slotA < assignment[roomA].length; slotA++) {
@@ -365,19 +423,16 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             const charA = assignment[roomA][slotA];
             const charB = assignment[roomB][slotB];
 
-            // Don't swap non-matching chars INTO Control Nexus
             if (rooms[roomA] === 'Control Nexus' && !hasMatchingTalent(charB, 'Control Nexus', eliteLevels[charB])) continue;
             if (rooms[roomB] === 'Control Nexus' && !hasMatchingTalent(charA, 'Control Nexus', eliteLevels[charA])) continue;
 
             assignment[roomA][slotA] = charB;
             assignment[roomB][slotB] = charA;
 
-            const { totalEfficiency: newEfficiency } = calculateTotalShipEfficiency(
-              assignment, rooms, roomTargets, eliteLevels
-            );
+            const { efficiency: newEfficiency, moodRegen: newMoodRegen } = evalSwap([roomA, roomB]);
 
             if (newEfficiency > bestEfficiency + 0.01) {
-              bestEfficiency = newEfficiency;
+              commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
               improved = true;
               swapsMade++;
             } else {
@@ -389,7 +444,6 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
       }
     }
 
-    // Try replacing assigned characters with unassigned ones
     const unassigned = getUnassignedChars();
     for (let roomIdx = 0; roomIdx < rooms.length; roomIdx++) {
       const roomType = rooms[roomIdx];
@@ -398,51 +452,39 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
         const assignedChar = assignment[roomIdx][slot];
 
         for (const unassignedChar of unassigned) {
-          // Check if unassigned char can work in this room
           if (roomType === 'Control Nexus' && !hasMatchingTalent(unassignedChar, 'Control Nexus', eliteLevels[unassignedChar])) continue;
 
-          // Try replacing
           assignment[roomIdx][slot] = unassignedChar;
 
-          // Now try to place the freed char in a better spot
           let bestPlacement = null;
-          let bestNewEfficiency = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels).totalEfficiency;
+          let { efficiency: bestNewEfficiency, moodRegen: bestNewMoodRegen } = evalSwap([roomIdx]);
 
-          // Try placing freed char in each room with space or by displacement
           for (let targetRoom = 0; targetRoom < rooms.length; targetRoom++) {
             if (targetRoom === roomIdx) continue;
-
             const targetRoomType = rooms[targetRoom];
-
-            // Skip if freed char can't work in target room (for Control Nexus)
             if (targetRoomType === 'Control Nexus' && !hasMatchingTalent(assignedChar, 'Control Nexus', eliteLevels[assignedChar])) continue;
 
             if (assignment[targetRoom].length < 3) {
               assignment[targetRoom].push(assignedChar);
 
-              const { totalEfficiency: effWithPlacement } = calculateTotalShipEfficiency(
-                assignment, rooms, roomTargets, eliteLevels
-              );
-
-              if (effWithPlacement > bestNewEfficiency) {
-                bestNewEfficiency = effWithPlacement;
+              const { efficiency: eff, moodRegen: mr } = evalSwap([roomIdx, targetRoom]);
+              if (eff > bestNewEfficiency) {
+                bestNewEfficiency = eff;
+                bestNewMoodRegen = mr;
                 bestPlacement = { room: targetRoom, action: 'add' };
               }
 
               assignment[targetRoom].pop();
             }
 
-            // Try displacing someone in the target room
             for (let targetSlot = 0; targetSlot < assignment[targetRoom].length; targetSlot++) {
               const displaced = assignment[targetRoom][targetSlot];
               assignment[targetRoom][targetSlot] = assignedChar;
 
-              const { totalEfficiency: effWithDisplace } = calculateTotalShipEfficiency(
-                assignment, rooms, roomTargets, eliteLevels
-              );
-
-              if (effWithDisplace > bestNewEfficiency) {
-                bestNewEfficiency = effWithDisplace;
+              const { efficiency: eff, moodRegen: mr } = evalSwap([roomIdx, targetRoom]);
+              if (eff > bestNewEfficiency) {
+                bestNewEfficiency = eff;
+                bestNewMoodRegen = mr;
                 bestPlacement = { room: targetRoom, slot: targetSlot, action: 'displace', displaced };
               }
 
@@ -451,24 +493,21 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
           }
 
           if (bestNewEfficiency > bestEfficiency + 0.01) {
-            // Apply the best placement for the freed char
             if (bestPlacement) {
               if (bestPlacement.action === 'add') {
                 assignment[bestPlacement.room].push(assignedChar);
               } else if (bestPlacement.action === 'displace') {
-                // The displaced char becomes unassigned (will be reconsidered in next iteration)
                 assignment[bestPlacement.room][bestPlacement.slot] = assignedChar;
               }
             }
 
-            bestEfficiency = bestNewEfficiency;
+            const affected = [roomIdx];
+            if (bestPlacement) affected.push(bestPlacement.room);
+            commitSwap(affected, bestNewEfficiency, bestNewMoodRegen);
             improved = true;
             swapsMade++;
-
-            // Update unassigned list and restart this loop
             break;
           } else {
-            // Revert replacement
             assignment[roomIdx][slot] = assignedChar;
           }
         }
@@ -479,29 +518,24 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
       if (improved) break;
     }
 
-    // Also try moving a character to an empty slot (if any room has < 3)
     for (let roomA = 0; roomA < rooms.length; roomA++) {
       for (let roomB = 0; roomB < rooms.length; roomB++) {
         if (roomA === roomB) continue;
-        if (assignment[roomB].length >= 3) continue; // Room B is full
+        if (assignment[roomB].length >= 3) continue;
 
         for (let slotA = 0; slotA < assignment[roomA].length; slotA++) {
-          if (assignment[roomA].length <= 1) continue; // Don't empty a room completely
+          if (assignment[roomA].length <= 1) continue;
 
           const charA = assignment[roomA][slotA];
-
-          // Don't move non-matching chars INTO Control Nexus
           if (rooms[roomB] === 'Control Nexus' && !hasMatchingTalent(charA, 'Control Nexus', eliteLevels[charA])) continue;
 
           assignment[roomA].splice(slotA, 1);
           assignment[roomB].push(charA);
 
-          const { totalEfficiency: newEfficiency } = calculateTotalShipEfficiency(
-            assignment, rooms, roomTargets, eliteLevels
-          );
+          const { efficiency: newEfficiency, moodRegen: newMoodRegen } = evalSwap([roomA, roomB]);
 
           if (newEfficiency > bestEfficiency + 0.01) {
-            bestEfficiency = newEfficiency;
+            commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
             improved = true;
             swapsMade++;
           } else {
@@ -531,7 +565,6 @@ export async function optimizeLayout(selectedCharacters, rooms, roomTargets = {}
   let totalSwapsMade = 0;
   let configsTried = 0;
 
-  // Try each possible Control Nexus configuration
   for (const nexusConfig of nexusConfigs) {
     configsTried++;
 
@@ -644,7 +677,6 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
       }
     }
 
-    // Format target for display
     let targetDisplay = null;
     if (target) {
       targetDisplay = Array.isArray(target) ? target.join(', ') : target;
