@@ -45,6 +45,7 @@ function handleSelectZone(zoneId) {
   if (!zoneId) return;
   const builds = getBuilds();
   const zone = ESSENCE_ZONES[zoneId];
+  if (!zone) return;
   const requiredSecs = new Set(builds.map(b => b.secondary));
   const requiredSkills = new Set(builds.map(b => b.skill));
   const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));

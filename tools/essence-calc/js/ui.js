@@ -38,6 +38,7 @@ export function cacheElements() {
 
 export function getVal(id) {
   const el = elements[id] || document.getElementById(id);
+  if (!el) return 1;
   return Math.max(1, parseInt(el.value) || 1);
 }
 
@@ -297,18 +298,18 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
     <div class="stats-row">
       <div class="stat-box">
         <div class="stat-label">Per Essence</div>
-        <div class="stat-value">${(currentP * 100).toFixed(2)}%</div>
-        <div class="stat-sub">1 in ${Math.round(1 / currentP)}</div>
+        <div class="stat-value">${currentP > 0 ? (currentP * 100).toFixed(2) + '%' : '0%'}</div>
+        <div class="stat-sub">${currentP > 0 ? '1 in ' + Math.round(1 / currentP) : 'Impossible'}</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Per Run</div>
-        <div class="stat-value">${(stats.pRunHit * 100).toFixed(1)}%</div>
-        <div class="stat-sub">1 in ${stats.avgRuns.toFixed(1)}</div>
+        <div class="stat-value">${stats.pRunHit > 0 ? (stats.pRunHit * 100).toFixed(1) + '%' : '0%'}</div>
+        <div class="stat-sub">${stats.pRunHit > 0 ? '1 in ' + stats.avgRuns.toFixed(1) : 'Impossible'}</div>
       </div>
       <div class="stat-box">
         <div class="stat-label">Avg Sanity</div>
-        <div class="stat-value">${Math.round(stats.avgSanity).toLocaleString()}</div>
-        <div class="stat-sub">${stats.avgRegenDays.toFixed(1)} days regen</div>
+        <div class="stat-value">${stats.pRunHit > 0 ? Math.round(stats.avgSanity).toLocaleString() : '∞'}</div>
+        <div class="stat-sub">${stats.pRunHit > 0 ? stats.avgRegenDays.toFixed(1) + ' days regen' : '∞'}</div>
       </div>
     </div>
 

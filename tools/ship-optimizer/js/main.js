@@ -238,7 +238,12 @@ function handleDrop(e) {
   const dropTarget = e.target.closest('.result-operator[draggable], .result-drop-zone');
   if (!dropTarget) return;
 
-  const sourceData = JSON.parse(e.dataTransfer.getData('text/plain'));
+  let sourceData;
+  try {
+    sourceData = JSON.parse(e.dataTransfer.getData('text/plain'));
+  } catch {
+    return;
+  }
 
   if (sourceData.type === 'character') {
     // Dragging from character list
