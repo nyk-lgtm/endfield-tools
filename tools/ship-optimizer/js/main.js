@@ -24,6 +24,7 @@ import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
 import { optimizeLayout, buildResults } from './calculations.js';
 import { initHelpModal } from '../../../shared/modal.js';
 import { initNav } from '../../../shared/nav.js';
+import { showToast } from '../../../shared/toast.js';
 
 // DOM element cache
 const elements = {
@@ -127,7 +128,7 @@ async function handleOptimize() {
 
   // Need at least some characters to optimize
   if (Object.keys(selectedChars).length === 0) {
-    alert('Please select at least one character');
+    showToast('Please select at least one character');
     return;
   }
 
