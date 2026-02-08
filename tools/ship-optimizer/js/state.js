@@ -1,10 +1,10 @@
 import { CHARACTERS } from '../../../data/index.js';
 
-// Initialize elite levels for all characters (default to 'max')
+// Initialize elite levels for all characters (default to 'e4')
 function initEliteLevels() {
   const levels = {};
   for (const name of Object.keys(CHARACTERS)) {
-    levels[name] = 'max';
+    levels[name] = 'e4';
   }
   return levels;
 }
@@ -24,7 +24,7 @@ let state = {
     3: 'Weapon EXP',
     4: 'Weapon EXP'
   },
-  // Elite levels for ALL characters: { name: 'max' | 'e2' | 'e1' }
+  // Elite levels for ALL characters: { name: 'e4' | 'e3' | 'e2' | 'e1' }
   eliteLevels: initEliteLevels(),
   // Selected character names (Set-like object)
   selectedCharacters: {},
@@ -89,7 +89,7 @@ export function deselectAllCharacters() {
 
 // Elite levels (separate from selection)
 export function getEliteLevel(name) {
-  return state.eliteLevels[name] || 'max';
+  return state.eliteLevels[name] || 'e4';
 }
 
 export function setEliteLevel(name, level) {

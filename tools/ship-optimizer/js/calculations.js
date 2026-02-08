@@ -17,7 +17,7 @@ const PRODUCTION_STATS = {
 /**
  * Get the talents a character can contribute at a given elite level
  */
-export function getCharacterTalents(charName, maxElite = 'max') {
+export function getCharacterTalents(charName, maxElite = 'e4') {
   const charData = CHARACTERS[charName];
   if (!charData) return [];
 
@@ -26,7 +26,6 @@ export function getCharacterTalents(charName, maxElite = 'max') {
 
   // Talent slots: slot1 (e1→e3), slot2 (e2→e4)
   const eliteRanges = {
-    'max': ['e3', 'e4'],  // both slots upgraded
     'e4': ['e3', 'e4'],
     'e3': ['e3', 'e2'],   // slot1 upgraded, slot2 base
     'e2': ['e1', 'e2'],   // both slots base
@@ -49,7 +48,7 @@ export function getCharacterTalents(charName, maxElite = 'max') {
 /**
  * Get talents a character contributes when placed in a specific cabin
  */
-export function getCharacterTalentsForCabin(charName, cabin, maxElite = 'max') {
+export function getCharacterTalentsForCabin(charName, cabin, maxElite = 'e4') {
   const allTalents = getCharacterTalents(charName, maxElite);
   return allTalents.filter(t => t.cabin === cabin);
 }
@@ -92,7 +91,7 @@ function getRoomStats(operators, roomType, targetProducts, eliteLevels) {
     : (PRODUCTION_STATS[roomType] || []);
 
   for (const charName of operators) {
-    const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'max');
+    const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
     for (const talent of talents) {
       // Mood Regen is special - always track it separately for global uptime calc
       if (talent.stat === 'Mood Regen') {
@@ -145,7 +144,7 @@ function calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevel
       for (const product of targetArray) {
         let productBonus = 0;
         for (const charName of operators) {
-          const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'max');
+          const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
           for (const t of talents) {
             if (t.stat === product) productBonus += t.value;
           }
@@ -586,30 +585,30 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     let slowMoodDrop = 0;
 
     const operatorResults = operators.map(charName => {
-      const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'max');
+      const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
       const stats = [];
-      let maxElite = 'e1';
+      let minElite = 'e1';
 
       for (const talent of talents) {
         if (relevantStats.includes(talent.stat)) {
           productionBonus += talent.value;
           stats.push({ stat: talent.stat, value: talent.value });
-          if (talent.elite > maxElite) maxElite = talent.elite;
+          if (talent.elite > minElite) minElite = talent.elite;
         } else if (talent.stat === 'Slow Mood Drop') {
           slowMoodDrop += talent.value;
           stats.push({ stat: 'Mood Drop', value: -talent.value });
-          if (talent.elite > maxElite) maxElite = talent.elite;
+          if (talent.elite > minElite) minElite = talent.elite;
         } else if (talent.stat === 'Mood Regen' && roomType === 'Control Nexus') {
           productionBonus += talent.value;
           stats.push({ stat: talent.stat, value: talent.value });
-          if (talent.elite > maxElite) maxElite = talent.elite;
+          if (talent.elite > minElite) minElite = talent.elite;
         }
       }
 
       return {
         name: charName,
         stats: stats.length > 0 ? stats : [{ stat: 'No matching talent', value: 0 }],
-        elite: stats.length > 0 ? maxElite : 'e1'
+        elite: stats.length > 0 ? minElite : 'e1'
       };
     });
 
@@ -626,7 +625,7 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
           // Sum only bonuses for this specific product
           let productBonus = 0;
           for (const charName of operators) {
-            const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'max');
+            const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
             for (const talent of talents) {
               if (talent.stat === product) {
                 productBonus += talent.value;

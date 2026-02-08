@@ -8,7 +8,7 @@ import {
 } from './state.js';
 
 const GROWTH_PRODUCTS = ['Fungal Matter', 'Plant', 'Rare Mineral'];
-const ELITE_LEVELS = ['e1', 'e2', 'e3', 'max'];
+const ELITE_LEVELS = ['e1', 'e2', 'e3', 'e4'];
 
 export function renderRoomConfig(container) {
   const rooms = getRooms();
@@ -74,7 +74,6 @@ function getCharacterCabinSummary(charData) {
 
 // Format elite level for display
 function formatEliteLabel(level) {
-  if (level === 'max') return 'E4';
   return level.toUpperCase();
 }
 
