@@ -219,6 +219,7 @@ function handleDragLeave(e) {
 
 function removeFromAssignment(assignment, name) {
   for (let i = 0; i < assignment.length; i++) {
+    if (!Array.isArray(assignment[i])) continue;
     const idx = assignment[i].indexOf(name);
     if (idx !== -1) {
       assignment[i].splice(idx, 1);
@@ -245,10 +246,12 @@ function handleDrop(e) {
     return;
   }
 
+  const dstRoom = parseInt(dropTarget.dataset.roomIndex);
+  if (isNaN(dstRoom) || !assignment[dstRoom]) return;
+
   if (sourceData.type === 'character') {
     // Dragging from character list
     const name = sourceData.name;
-    const dstRoom = parseInt(dropTarget.dataset.roomIndex);
 
     if (assignment[dstRoom].includes(name)) return;
     removeFromAssignment(assignment, name);
@@ -259,22 +262,23 @@ function handleDrop(e) {
     } else {
       // Drop on operator → replace them
       const dstSlot = parseInt(dropTarget.dataset.slot);
+      if (isNaN(dstSlot) || dstSlot >= assignment[dstRoom].length) return;
       assignment[dstRoom][dstSlot] = name;
     }
   } else {
     // Dragging from results (room-to-room)
     const srcRoom = sourceData.roomIndex;
     const srcSlot = sourceData.slot;
+    if (!assignment[srcRoom] || srcSlot >= assignment[srcRoom].length) return;
 
     if (dropTarget.classList.contains('result-drop-zone')) {
-      const dstRoom = parseInt(dropTarget.dataset.roomIndex);
       if (dstRoom === srcRoom) return;
       if (assignment[dstRoom].length >= 3) return;
       const operator = assignment[srcRoom].splice(srcSlot, 1)[0];
       assignment[dstRoom].push(operator);
     } else {
-      const dstRoom = parseInt(dropTarget.dataset.roomIndex);
       const dstSlot = parseInt(dropTarget.dataset.slot);
+      if (isNaN(dstSlot) || dstSlot >= assignment[dstRoom].length) return;
       if (dstRoom === srcRoom) return;
       const temp = assignment[srcRoom][srcSlot];
       assignment[srcRoom][srcSlot] = assignment[dstRoom][dstSlot];
