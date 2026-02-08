@@ -330,8 +330,6 @@ function init() {
   // Initial render
   renderRoomConfig(elements.roomConfig);
   renderCharacterList(elements.characterList);
-
-  console.log('Ship Optimizer initialized');
 }
 
 document.addEventListener('DOMContentLoaded', init);

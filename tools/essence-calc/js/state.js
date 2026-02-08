@@ -18,14 +18,6 @@ export function getBuilds() {
   return currentMode === 'multi' ? plannerBuilds : calcBuilds;
 }
 
-export function setBuilds(newBuilds) {
-  if (currentMode === 'multi') {
-    plannerBuilds = newBuilds;
-  } else {
-    calcBuilds = newBuilds;
-  }
-}
-
 export function getSelectedZone() {
   return selectedZone;
 }

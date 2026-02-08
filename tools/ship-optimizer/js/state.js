@@ -35,10 +35,6 @@ let state = {
   optimizerConfig: null
 };
 
-export function getState() {
-  return state;
-}
-
 export function getRooms() {
   return state.rooms;
 }

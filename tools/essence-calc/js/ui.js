@@ -91,7 +91,7 @@ export function renderModeToggle(mode) {
   elements.multiModeResults.style.display = mode === 'multi' ? 'block' : 'none';
 }
 
-export function renderMultiZonePlan(onSelectZone) {
+export function renderMultiZonePlan() {
   const builds = getBuilds();
   const essencesPerRun = getVal('essencesPerRun');
   const sanityCost = getVal('sanityCost');
