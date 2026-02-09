@@ -1,4 +1,4 @@
-import { ESSENCE_ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL } from '../../../data/index.js';
+import { ESSENCE_ZONES, ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from '../../../data/index.js';
 import {
   getBuilds, getSelectedZone, setSelectedZone,
   getSelectedTicket, setSelectedTicket, getCurrentMode,
@@ -322,7 +322,7 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
           if (stats.pRunHit <= 0) return `<tr><td>${c * 100}%</td><td>∞</td><td>∞</td><td>∞</td></tr>`;
           const runs = calculateConfidenceRuns(c, stats.pRunMiss);
           const sanity = runs * sanityCost;
-          const days = (sanity * 432) / 86400;
+          const days = (sanity * SECONDS_PER_SANITY) / SECONDS_PER_DAY;
           return `<tr><td>${c * 100}%</td><td>${runs}</td><td>${sanity.toLocaleString()}</td><td>~${days.toFixed(1)} days</td></tr>`;
         }).join('')}
       </tbody>

@@ -1,5 +1,3 @@
-// Ship Optimizer entry point
-
 import {
   getRooms,
   setRoom,
@@ -21,7 +19,7 @@ import {
   getAllEliteLevels
 } from './state.js';
 import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
-import { optimizeLayout, buildResults } from './calculations.js';
+import { optimizeLayout, buildResults, MAX_OPERATORS_PER_ROOM } from './calculations.js';
 import { initHelpModal } from '../../../shared/modal.js';
 import { initNav } from '../../../shared/nav.js';
 import { showToast } from '../../../shared/toast.js';
@@ -45,7 +43,6 @@ function handleCharacterClick(e) {
   const item = e.target.closest('.character-item');
   if (!item) return;
 
-  // Ignore clicks on elite buttons
   if (e.target.classList.contains('elite-btn')) return;
 
   const name = item.dataset.name;
@@ -97,14 +94,12 @@ function handleRoomTypeChange(e) {
 }
 
 function handleTargetChange(e) {
-  // Manufacturing target (select)
   if (e.target.classList.contains('target-select')) {
     const roomIndex = parseInt(e.target.dataset.room);
     setRoomTarget(roomIndex, e.target.value);
     return;
   }
 
-  // Growth target (checkboxes)
   const checkboxContainer = e.target.closest('.target-checkboxes');
   if (checkboxContainer) {
     const roomIndex = parseInt(checkboxContainer.dataset.room);
@@ -112,7 +107,6 @@ function handleTargetChange(e) {
     const selected = Array.from(checkboxes)
       .filter(cb => cb.checked)
       .map(cb => cb.value);
-    // Ensure at least one is selected
     if (selected.length === 0) {
       e.target.checked = true;
       return;
@@ -126,7 +120,6 @@ async function handleOptimize() {
   const rooms = getRooms();
   const roomTargets = getRoomTargets();
 
-  // Need at least some characters to optimize
   if (Object.keys(selectedChars).length === 0) {
     showToast('Please select at least one character');
     return;
@@ -258,23 +251,21 @@ function handleDrop(e) {
     removeFromAssignment(assignment, name);
 
     if (dropTarget.classList.contains('result-drop-zone')) {
-      if (assignment[dstRoom].length >= 3) return;
+      if (assignment[dstRoom].length >= MAX_OPERATORS_PER_ROOM) return;
       assignment[dstRoom].push(name);
     } else {
-      // Drop on operator → replace them
       const dstSlot = parseInt(dropTarget.dataset.slot);
       if (isNaN(dstSlot) || dstSlot >= assignment[dstRoom].length) return;
       assignment[dstRoom][dstSlot] = name;
     }
   } else {
-    // Dragging from results (room-to-room)
     const srcRoom = sourceData.roomIndex;
     const srcSlot = sourceData.slot;
     if (!assignment[srcRoom] || srcSlot >= assignment[srcRoom].length) return;
 
     if (dropTarget.classList.contains('result-drop-zone')) {
       if (dstRoom === srcRoom) return;
-      if (assignment[dstRoom].length >= 3) return;
+      if (assignment[dstRoom].length >= MAX_OPERATORS_PER_ROOM) return;
       const operator = assignment[srcRoom].splice(srcSlot, 1)[0];
       assignment[dstRoom].push(operator);
     } else {

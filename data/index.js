@@ -2,7 +2,7 @@
 // Import from here: import { ESSENCE_ZONES, ATTRIBUTES, ... } from '../../data/index.js'
 
 export { ESSENCE_ZONES } from './zones.js';
-export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL } from './constants.js';
+export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from './constants.js';
 export { CHARACTERS, CABINS, SHIP_STAT_TYPES } from './characters.js';
 
 // Derived data

@@ -98,5 +98,4 @@ function init() {
   renderMultiZonePlan();
 }
 
-// Start the app when DOM is ready
 document.addEventListener('DOMContentLoaded', init);

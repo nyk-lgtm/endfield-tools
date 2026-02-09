@@ -6,6 +6,9 @@ const BASE_MOOD_REGEN = 12;    // % per hour
 const BASE_EFFICIENCY = 100;   // %
 const OPERATOR_BONUS = 40;     // % per operator in room
 
+export const MAX_OPERATORS_PER_ROOM = 3;
+const EFFICIENCY_EPSILON = 0.01;
+
 // Production stats by cabin type
 const PRODUCTION_STATS = {
   'Manufacturing Cabin': ['Weapon EXP', 'Operator EXP'],
@@ -13,6 +16,15 @@ const PRODUCTION_STATS = {
   'Reception Room': ['Clue Collecting Efficiency'],
   'Control Nexus': ['Mood Regen']
 };
+
+/**
+ * Resolve target products into an array
+ */
+function resolveTargets(targetProducts, roomType) {
+  return targetProducts
+    ? (Array.isArray(targetProducts) ? targetProducts : [targetProducts])
+    : (PRODUCTION_STATS[roomType] || []);
+}
 
 /**
  * Get the talents a character can contribute at a given elite level
@@ -86,9 +98,7 @@ function getRoomStats(operators, roomType, targetProducts, eliteLevels) {
   let slowMoodDrop = 0;
   let moodRegen = 0;
 
-  const relevantStats = targetProducts
-    ? (Array.isArray(targetProducts) ? targetProducts : [targetProducts])
-    : (PRODUCTION_STATS[roomType] || []);
+  const relevantStats = resolveTargets(targetProducts, roomType);
 
   for (const charName of operators) {
     const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
@@ -105,6 +115,36 @@ function getRoomStats(operators, roomType, targetProducts, eliteLevels) {
   }
 
   return { productionBonus, slowMoodDrop, moodRegen };
+}
+
+/**
+ * Calculate effective efficiency for a single room given operators and global mood regen
+ */
+function calcRoomEffective(operators, roomType, target, eliteLevels, globalMoodRegen) {
+  if (roomType === 'Control Nexus') return 0;
+
+  const { slowMoodDrop } = getRoomStats(operators, roomType, target, eliteLevels);
+  const targetArray = resolveTargets(target, roomType);
+
+  if (targetArray.length > 1) {
+    let total = 0;
+    for (const product of targetArray) {
+      let productBonus = 0;
+      for (const charName of operators) {
+        const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
+        for (const t of talents) {
+          if (t.stat === product) productBonus += t.value;
+        }
+      }
+      const { effective } = calculateRoomEfficiency(operators.length, productBonus, slowMoodDrop, globalMoodRegen);
+      total += effective;
+    }
+    return total / targetArray.length;
+  }
+
+  const { productionBonus } = getRoomStats(operators, roomType, target, eliteLevels);
+  const { effective } = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
+  return effective;
 }
 
 /**
@@ -128,39 +168,14 @@ function calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevel
     const target = roomTargets[i];
 
     if (roomType === 'Control Nexus') {
-      // Control Nexus doesn't have direct efficiency, but we track mood regen
       roomEfficiencies.push({ moodRegen: globalMoodRegen, effective: 0 });
       continue;
     }
 
+    const effective = calcRoomEffective(operators, roomType, target, eliteLevels, globalMoodRegen);
     const { slowMoodDrop } = getRoomStats(operators, roomType, target, eliteLevels);
-
-    const targetArray = target
-      ? (Array.isArray(target) ? target : [target])
-      : (PRODUCTION_STATS[roomType] || []);
-
-    let roomEffective = 0;
-    if (targetArray.length > 1) {
-      for (const product of targetArray) {
-        let productBonus = 0;
-        for (const charName of operators) {
-          const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
-          for (const t of talents) {
-            if (t.stat === product) productBonus += t.value;
-          }
-        }
-        const { effective } = calculateRoomEfficiency(operators.length, productBonus, slowMoodDrop, globalMoodRegen);
-        roomEffective += effective;
-      }
-      roomEffective /= targetArray.length; // Average
-    } else {
-      const { productionBonus } = getRoomStats(operators, roomType, target, eliteLevels);
-      const { effective } = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
-      roomEffective = effective;
-    }
-
-    roomEfficiencies.push({ effective: roomEffective, slowMoodDrop });
-    totalEfficiency += roomEffective;
+    roomEfficiencies.push({ effective, slowMoodDrop });
+    totalEfficiency += effective;
   }
 
   return { totalEfficiency, roomEfficiencies, globalMoodRegen };
@@ -176,9 +191,7 @@ function scoreCharacterForRoom(charName, roomType, maxElite, currentMoodDrop, gl
   let productionValue = 0;
   let moodValue = 0;
 
-  const relevantStats = targetProducts
-    ? (Array.isArray(targetProducts) ? targetProducts : [targetProducts])
-    : (PRODUCTION_STATS[roomType] || []);
+  const relevantStats = resolveTargets(targetProducts, roomType);
 
   for (const talent of talents) {
     if (relevantStats.includes(talent.stat)) {
@@ -235,7 +248,7 @@ function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
 function assignRoomGreedy(roomIndex, roomType, assignment, availableChars, eliteLevels, globalMoodRegen, targetProducts) {
   let currentMoodDrop = 0;
 
-  for (let slot = 0; slot < 3; slot++) {
+  for (let slot = 0; slot < MAX_OPERATORS_PER_ROOM; slot++) {
     let bestChar = null;
     let bestScore = -Infinity;
     let bestMoodValue = 0;
@@ -315,51 +328,12 @@ function getControlNexusCandidates(selectedCharacters) {
  */
 function generateNexusConfigs(nexusCandidates) {
   const configs = [[]]; // Include empty config
-  for (let k = 1; k <= Math.min(3, nexusCandidates.length); k++) {
+  for (let k = 1; k <= Math.min(MAX_OPERATORS_PER_ROOM, nexusCandidates.length); k++) {
     for (const combo of combinations(nexusCandidates, k)) {
       configs.push(combo);
     }
   }
   return configs;
-}
-
-/**
- * Calculate effective efficiency for a single room given global mood regen
- */
-function calcRoomEffective(roomIndex, assignment, rooms, roomTargets, eliteLevels, globalMoodRegen) {
-  const roomType = rooms[roomIndex];
-  const operators = assignment[roomIndex] || [];
-  const target = roomTargets[roomIndex];
-
-  if (roomType === 'Control Nexus') return 0;
-
-  const { slowMoodDrop } = getRoomStats(operators, roomType, target, eliteLevels);
-
-  const targetArray = target
-    ? (Array.isArray(target) ? target : [target])
-    : (PRODUCTION_STATS[roomType] || []);
-
-  let roomEffective = 0;
-  if (targetArray.length > 1) {
-    for (const product of targetArray) {
-      let productBonus = 0;
-      for (const charName of operators) {
-        const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
-        for (const t of talents) {
-          if (t.stat === product) productBonus += t.value;
-        }
-      }
-      const { effective } = calculateRoomEfficiency(operators.length, productBonus, slowMoodDrop, globalMoodRegen);
-      roomEffective += effective;
-    }
-    roomEffective /= targetArray.length;
-  } else {
-    const { productionBonus } = getRoomStats(operators, roomType, target, eliteLevels);
-    const { effective } = calculateRoomEfficiency(operators.length, productionBonus, slowMoodDrop, globalMoodRegen);
-    roomEffective = effective;
-  }
-
-  return roomEffective;
 }
 
 /**
@@ -374,7 +348,9 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 
   const { globalMoodRegen } = calculateTotalShipEfficiency(assignment, rooms, roomTargets, eliteLevels);
   let cachedMoodRegen = globalMoodRegen;
-  const roomEffCache = rooms.map((_, i) => calcRoomEffective(i, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen));
+  const roomEffCache = rooms.map((_, i) =>
+    calcRoomEffective(assignment[i] || [], rooms[i], roomTargets[i], eliteLevels, cachedMoodRegen)
+  );
   let bestEfficiency = roomEffCache.reduce((sum, e) => sum + e, 0);
 
   function evalSwap(affectedRooms) {
@@ -385,7 +361,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
     let newTotal = bestEfficiency;
     for (const ri of affectedRooms) {
       const oldEff = roomEffCache[ri];
-      const newEff = calcRoomEffective(ri, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
+      const newEff = calcRoomEffective(assignment[ri] || [], rooms[ri], roomTargets[ri], eliteLevels, cachedMoodRegen);
       newTotal += newEff - oldEff;
     }
     return { efficiency: newTotal, moodRegen: cachedMoodRegen };
@@ -395,11 +371,11 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
     bestEfficiency = newEfficiency;
     cachedMoodRegen = newMoodRegen;
     for (const ri of affectedRooms) {
-      roomEffCache[ri] = calcRoomEffective(ri, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
+      roomEffCache[ri] = calcRoomEffective(assignment[ri] || [], rooms[ri], roomTargets[ri], eliteLevels, cachedMoodRegen);
     }
     if (affectedRooms.includes(controlNexusIndex)) {
       for (let i = 0; i < rooms.length; i++) {
-        roomEffCache[i] = calcRoomEffective(i, assignment, rooms, roomTargets, eliteLevels, cachedMoodRegen);
+        roomEffCache[i] = calcRoomEffective(assignment[i] || [], rooms[i], roomTargets[i], eliteLevels, cachedMoodRegen);
       }
     }
   }
@@ -431,7 +407,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 
             const { efficiency: newEfficiency, moodRegen: newMoodRegen } = evalSwap([roomA, roomB]);
 
-            if (newEfficiency > bestEfficiency + 0.01) {
+            if (newEfficiency > bestEfficiency + EFFICIENCY_EPSILON) {
               commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
               improved = true;
               swapsMade++;
@@ -464,7 +440,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             const targetRoomType = rooms[targetRoom];
             if (targetRoomType === 'Control Nexus' && !hasMatchingTalent(assignedChar, 'Control Nexus', eliteLevels[assignedChar])) continue;
 
-            if (assignment[targetRoom].length < 3) {
+            if (assignment[targetRoom].length < MAX_OPERATORS_PER_ROOM) {
               assignment[targetRoom].push(assignedChar);
 
               const { efficiency: eff, moodRegen: mr } = evalSwap([roomIdx, targetRoom]);
@@ -492,7 +468,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             }
           }
 
-          if (bestNewEfficiency > bestEfficiency + 0.01) {
+          if (bestNewEfficiency > bestEfficiency + EFFICIENCY_EPSILON) {
             if (bestPlacement) {
               if (bestPlacement.action === 'add') {
                 assignment[bestPlacement.room].push(assignedChar);
@@ -521,7 +497,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
     for (let roomA = 0; roomA < rooms.length; roomA++) {
       for (let roomB = 0; roomB < rooms.length; roomB++) {
         if (roomA === roomB) continue;
-        if (assignment[roomB].length >= 3) continue;
+        if (assignment[roomB].length >= MAX_OPERATORS_PER_ROOM) continue;
 
         for (let slotA = 0; slotA < assignment[roomA].length; slotA++) {
           if (assignment[roomA].length <= 1) continue;
@@ -534,7 +510,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 
           const { efficiency: newEfficiency, moodRegen: newMoodRegen } = evalSwap([roomA, roomB]);
 
-          if (newEfficiency > bestEfficiency + 0.01) {
+          if (newEfficiency > bestEfficiency + EFFICIENCY_EPSILON) {
             commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
             improved = true;
             swapsMade++;
@@ -610,9 +586,7 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     const operators = assignment[i] || [];
     const target = roomTargets[i];
 
-    const relevantStats = target
-      ? (Array.isArray(target) ? target : [target])
-      : (PRODUCTION_STATS[roomType] || []);
+    const relevantStats = resolveTargets(target, roomType);
 
     let productionBonus = 0;
     let slowMoodDrop = 0;
@@ -650,7 +624,7 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     let efficiencyByProduct = null;
 
     if (roomType !== 'Control Nexus') {
-      const targetArray = target ? (Array.isArray(target) ? target : [target]) : relevantStats;
+      const targetArray = resolveTargets(target, roomType);
 
       if (targetArray.length > 1) {
         efficiencyByProduct = {};
