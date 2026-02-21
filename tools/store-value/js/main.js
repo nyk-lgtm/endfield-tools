@@ -25,6 +25,25 @@ function handleSeasonChange(e) {
   renderPassView(season);
 }
 
+function handlePassTierClick(e) {
+  const tierHeader = e.target.closest('.pass-tier-header');
+  if (tierHeader) {
+    const tier = tierHeader.closest('.pass-tier');
+    tier.classList.toggle('collapsed');
+    tierHeader.querySelector('.collapse-indicator').textContent =
+      tier.classList.contains('collapsed') ? '▶' : '▼';
+    return;
+  }
+
+  const sectionHeader = e.target.closest('.reward-section-header');
+  if (sectionHeader) {
+    const section = sectionHeader.closest('.reward-section');
+    section.classList.toggle('collapsed');
+    sectionHeader.querySelector('.collapse-indicator').textContent =
+      section.classList.contains('collapsed') ? '▶' : '▼';
+  }
+}
+
 function init() {
   cacheElements();
   initNav();
@@ -38,6 +57,9 @@ function init() {
 
   // Season selector
   document.getElementById('seasonSelect').addEventListener('change', handleSeasonChange);
+
+  // Pass tier and category collapsibles (event delegation)
+  document.getElementById('passTiers').addEventListener('click', handlePassTierClick);
 
   // Initial render
   renderViewToggle(getView());

@@ -47,11 +47,7 @@
         </select>
       </div>
 
-      <h3>Cumulative Totals by Tier</h3>
-      <div id="tierCards" class="tier-cards"></div>
-
-      <h3>What Each Upgrade Adds</h3>
-      <div id="upgradeCards" class="upgrade-cards"></div>
+      <div id="passTiers"></div>
     </div>
   </div>
 
@@ -67,10 +63,16 @@
 
       <p><strong>Protocol Pass</strong></p>
       <p>Tiers are additive: buying Customized gives you Basic + Originium + Customized rewards.</p>
-      <p>The upgrade cards show what each tier adds on top of the previous tier.</p>
+      <p>Each tier shows cumulative totals at max level (60). Items with a (+N) marker show what that specific tier adds on top of the previous.</p>
+
+      <p><strong>Sanity Values</strong></p>
+      <p>Sanity equivalents estimate how much sanity you'd spend farming the same items in protocol spaces. For each farmable item, we pick the most efficient protocol space tier:</p>
+      <p><code>Sanity per item = Stage cost / Drop quantity</code></p>
+      <p>The best (lowest) rate across all tiers is used. Emergency Sanity Boosters are valued at 40 sanity each (their direct restore amount). Cosmetics, currencies, and other non-farmable items show a dash.</p>
     </div>
   </div>
 
   <script type="module" src="js/main.js"></script>
+  <script type="module" src="../../shared/todo.js"></script>
 </body>
 </html>

@@ -22,84 +22,144 @@ input[type="checkbox"] {
   min-width: 160px;
 }
 
-/* Tier cards grid */
-.tier-cards {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.tier-card {
+/* Pass tier collapsible */
+.pass-tier {
   background: var(--color-bg-element);
   border: 1px solid var(--color-border);
   border-radius: 8px;
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+
+.pass-tier-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   padding: 14px;
+  cursor: pointer;
+  user-select: none;
 }
 
-.tier-card-header {
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--color-border);
+.pass-tier-header:hover {
+  background: var(--color-bg-accent);
 }
 
-.tier-card-name {
-  font-size: 14px;
+.collapse-indicator {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.pass-tier-name {
+  font-size: 16px;
   font-weight: 600;
   color: var(--color-white);
-  margin-bottom: 2px;
+  flex: 1;
 }
 
-.tier-card-cost {
-  font-size: 12px;
-  color: var(--color-text-muted);
-}
-
-/* Upgrade cards grid */
-.upgrade-cards {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+.pass-tier-meta {
+  display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-/* Reward categories inside cards */
-.reward-category {
-  margin-bottom: 10px;
+.pass-tier-cost {
+  font-size: 13px;
+  color: var(--color-text-muted);
 }
 
-.reward-category:last-child {
+.pass-tier-sanity {
+  font-size: 13px;
+  color: var(--color-accent);
+  font-weight: 600;
+}
+
+.pass-tier-body {
+  border-top: 1px solid var(--color-border);
+  padding: 12px 14px 14px;
+}
+
+.pass-tier.collapsed .pass-tier-body {
+  display: none;
+}
+
+/* Reward sections (categories) within tiers */
+.reward-section {
+  margin-bottom: 14px;
+}
+
+.reward-section:last-child {
   margin-bottom: 0;
 }
 
-.category-label {
-  font-size: 11px;
+.reward-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 0;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 1px;
-  margin-bottom: 4px;
+  border-bottom: 1px solid var(--color-border);
 }
 
-.reward-row {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
+.reward-section-header:hover {
   color: var(--color-text-secondary);
-  padding: 2px 0;
 }
 
-/* Section labels */
-.section-label {
+.category-sanity {
+  margin-left: auto;
+  color: var(--color-accent);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.reward-section.collapsed .reward-section-body {
+  display: none;
+}
+
+/* Reward table */
+.reward-table {
+  width: 100%;
+  border-collapse: collapse;
   font-size: 14px;
-  color: var(--color-text-muted);
-  margin-bottom: 12px;
+  margin-top: 2px;
 }
 
-@media (max-width: 768px) {
-  .tier-cards {
-    grid-template-columns: 1fr;
-  }
+.reward-table th {
+  text-align: left;
+  padding: 4px 8px 4px 0;
+  color: var(--color-text-dim);
+  font-weight: 500;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: none;
+}
 
-  .upgrade-cards {
-    grid-template-columns: 1fr;
-  }
+.reward-table th:nth-child(2),
+.reward-table th:nth-child(3) {
+  text-align: right;
+}
+
+.reward-table td {
+  padding: 4px 8px 4px 0;
+  color: var(--color-text-secondary);
+  border-bottom: none;
+}
+
+.reward-table td:nth-child(2),
+.reward-table td:nth-child(3) {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.reward-delta {
+  font-size: 11px;
+  color: var(--color-text-muted);
 }

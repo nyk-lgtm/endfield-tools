@@ -1,14 +1,14 @@
-import { buildTopupRows, getSeasonData, computeTierTotals, formatItemName, formatCategory } from './calculations.js';
+import { buildTopupRows, getSeasonData, computeTierTotals, formatItemName, formatCategory, getSanityPerUnit, computeSanityBreakdown } from './calculations.js';
 
 const elements = {};
+const CATEGORIES = ['currencies', 'cosmetics', 'consumables', 'progression'];
 
 export function cacheElements() {
   elements.topupPanel = document.getElementById('topupPanel');
   elements.passPanel = document.getElementById('passPanel');
   elements.topupBody = document.getElementById('topupBody');
   elements.seasonSelect = document.getElementById('seasonSelect');
-  elements.tierCards = document.getElementById('tierCards');
-  elements.upgradeCards = document.getElementById('upgradeCards');
+  elements.passTiers = document.getElementById('passTiers');
   elements.toggleBtns = document.querySelectorAll('.toggle-btn');
 }
 
@@ -38,89 +38,77 @@ export function renderTopupTable(firstBuyUsed) {
   `).join('');
 }
 
-function renderRewardList(items, tierTotals, tierKey) {
-  const passData = getSeasonData(document.getElementById('seasonSelect').value);
-  const categories = ['currencies', 'cosmetics', 'consumables', 'progression'];
-  let html = '';
+function renderCategoryTable(passData, tierTotals, tierKey, cat, catSanity) {
+  const catItems = passData[cat];
+  if (!catItems) return '';
 
-  for (const cat of categories) {
-    const catItems = passData[cat];
-    if (!catItems) continue;
+  const entries = Object.keys(catItems).filter(key => tierTotals[tierKey][key] > 0);
+  if (entries.length === 0) return '';
 
-    const catEntries = Object.keys(catItems).filter(key => tierTotals[tierKey][key] > 0);
-    if (catEntries.length === 0) continue;
+  const hasSanity = catSanity > 0;
+  const sanityLabel = hasSanity ? `<span class="category-sanity">~${catSanity.toLocaleString()} sanity</span>` : '';
 
-    html += `<div class="reward-category">
-      <div class="category-label">${formatCategory(cat)}</div>
-      ${catEntries.map(key => `
-        <div class="reward-row">
-          <span>${formatItemName(key)}</span>
-          <span class="text-accent">${tierTotals[tierKey][key].toLocaleString()}</span>
-        </div>
-      `).join('')}
-    </div>`;
+  let rows = '';
+  for (const key of entries) {
+    const cumulative = tierTotals[tierKey][key];
+    const delta = catItems[key][tierKey] ?? 0;
+    const showDelta = tierKey !== 'basic' && delta > 0 && delta < cumulative;
+    const rate = getSanityPerUnit(key);
+    const itemSanity = rate != null ? Math.round(cumulative * rate) : null;
+
+    rows += `<tr>
+      <td>${formatItemName(key)}</td>
+      <td class="text-accent">${cumulative.toLocaleString()}${showDelta ? ` <span class="reward-delta">(+${delta.toLocaleString()})</span>` : ''}</td>
+      <td class="text-muted">${itemSanity != null ? '~' + itemSanity.toLocaleString() : '\u2014'}</td>
+    </tr>`;
   }
 
-  return html;
+  return `<div class="reward-section">
+    <div class="reward-section-header">
+      <span class="collapse-indicator">\u25bc</span>
+      <span>${formatCategory(cat)}</span>
+      ${sanityLabel}
+    </div>
+    <div class="reward-section-body">
+      <table class="reward-table">
+        <thead><tr><th>Item</th><th>Qty</th><th>Sanity</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  </div>`;
 }
 
 export function renderPassView(seasonKey) {
   const passData = getSeasonData(seasonKey);
   if (!passData) {
-    elements.tierCards.innerHTML = '<p class="text-error">Season data not found.</p>';
-    elements.upgradeCards.innerHTML = '';
+    elements.passTiers.innerHTML = '<p class="text-error">Season data not found.</p>';
     return;
   }
 
   const tierTotals = computeTierTotals(passData);
+  const sanity = computeSanityBreakdown(passData, tierTotals);
   const tierKeys = ['basic', 'originium', 'customized'];
 
-  // Tier overview cards — cumulative totals
-  elements.tierCards.innerHTML = tierKeys.map(tier => {
-    const info = passData.tiers[tier];
-    return `<div class="tier-card">
-      <div class="tier-card-header">
-        <div class="tier-card-name">${info.name}</div>
-        <div class="tier-card-cost">${info.cost}</div>
-      </div>
-      ${renderRewardList(null, tierTotals, tier)}
-    </div>`;
-  }).join('');
+  elements.passTiers.innerHTML = tierKeys.map((tierKey, i) => {
+    const info = passData.tiers[tierKey];
+    const tierSanity = sanity[tierKey];
+    const expanded = i === 0;
 
-  // Upgrade cards — what each upgrade adds (just the column values)
-  const upgrades = [
-    { from: 'basic', to: 'originium', label: `Basic \u2192 Originium`, cost: passData.tiers.originium.cost },
-    { from: 'originium', to: 'customized', label: `Originium \u2192 Customized`, cost: passData.tiers.customized.cost },
-  ];
-
-  const categories = ['currencies', 'cosmetics', 'consumables', 'progression'];
-
-  elements.upgradeCards.innerHTML = upgrades.map(upg => {
-    let html = `<div class="tier-card">
-      <div class="tier-card-header">
-        <div class="tier-card-name">${upg.label}</div>
-        <div class="tier-card-cost">${upg.cost}</div>
-      </div>`;
-
-    for (const cat of categories) {
-      const catItems = passData[cat];
-      if (!catItems) continue;
-
-      const entries = Object.entries(catItems).filter(([, tiers]) => tiers[upg.to] > 0);
-      if (entries.length === 0) continue;
-
-      html += `<div class="reward-category">
-        <div class="category-label">${formatCategory(cat)}</div>
-        ${entries.map(([key, tiers]) => `
-          <div class="reward-row">
-            <span>${formatItemName(key)}</span>
-            <span class="text-accent">+${tiers[upg.to].toLocaleString()}</span>
-          </div>
-        `).join('')}
-      </div>`;
+    let body = '';
+    for (const cat of CATEGORIES) {
+      body += renderCategoryTable(passData, tierTotals, tierKey, cat, tierSanity.categories[cat] ?? 0);
     }
 
-    html += '</div>';
-    return html;
+    return `<div class="pass-tier${expanded ? '' : ' collapsed'}">
+      <div class="pass-tier-header">
+        <span class="collapse-indicator">${expanded ? '\u25bc' : '\u25b6'}</span>
+        <div class="pass-tier-name">${info.name}</div>
+        <div class="pass-tier-meta">
+          <span class="pass-tier-cost">${info.cost}</span>
+          <span class="pass-tier-sanity">~${tierSanity.total.toLocaleString()} sanity</span>
+        </div>
+      </div>
+      <div class="pass-tier-body">${body}</div>
+    </div>`;
   }).join('');
 }
