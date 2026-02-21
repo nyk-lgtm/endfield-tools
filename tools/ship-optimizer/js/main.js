@@ -29,7 +29,8 @@ const elements = {
   roomConfig: null,
   characterList: null,
   resultsCard: null,
-  resultsContainer: null
+  resultsContainer: null,
+  staleHint: null
 };
 
 function cacheElements() {
@@ -37,6 +38,11 @@ function cacheElements() {
   elements.characterList = document.getElementById('characterList');
   elements.resultsCard = document.getElementById('resultsCard');
   elements.resultsContainer = document.getElementById('resultsContainer');
+  elements.staleHint = document.getElementById('staleHint');
+}
+
+function markStale() {
+  if (getAssignment()) elements.staleHint.hidden = false;
 }
 
 function handleCharacterClick(e) {
@@ -54,6 +60,7 @@ function handleCharacterClick(e) {
   }
 
   renderCharacterList(elements.characterList);
+  markStale();
 }
 
 function handleEliteClick(e) {
@@ -70,6 +77,7 @@ function handleEliteClick(e) {
   }
 
   renderCharacterList(elements.characterList);
+  markStale();
 }
 
 function handleGlobalEliteClick(e) {
@@ -84,6 +92,7 @@ function handleGlobalEliteClick(e) {
   });
 
   renderCharacterList(elements.characterList);
+  markStale();
 }
 
 function handleRoomTypeChange(e) {
@@ -91,12 +100,14 @@ function handleRoomTypeChange(e) {
   const roomIndex = parseInt(e.target.dataset.room);
   setRoom(roomIndex, e.target.value);
   renderRoomConfig(elements.roomConfig);
+  markStale();
 }
 
 function handleTargetChange(e) {
   if (e.target.classList.contains('target-select')) {
     const roomIndex = parseInt(e.target.dataset.room);
     setRoomTarget(roomIndex, e.target.value);
+    markStale();
     return;
   }
 
@@ -112,6 +123,7 @@ function handleTargetChange(e) {
       return;
     }
     setRoomTarget(roomIndex, selected);
+    markStale();
   }
 }
 
@@ -148,6 +160,7 @@ async function handleOptimize() {
 
   setResults(results);
   renderResults(elements.resultsContainer, elements.resultsCard);
+  elements.staleHint.hidden = true;
 }
 
 // Drag-and-drop handlers for result operators and character list
