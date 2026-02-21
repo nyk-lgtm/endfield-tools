@@ -6,7 +6,8 @@ import {
 } from './state.js';
 import {
   getValidZonesForEssence, getZoneConfigurations,
-  findBestTicketConfig, calculatePlanStats, calculateConfidenceRuns
+  findBestTicketConfig, calculatePlanStats, calculateConfidenceRuns,
+  deduplicateBuilds
 } from './calculations.js';
 
 // DOM element cache
@@ -83,6 +84,12 @@ export function renderBuilds(onUpdate, onRemove) {
       onRemove(index);
     });
   });
+
+  const unique = deduplicateBuilds(builds);
+  if (unique.length < builds.length) {
+    elements.buildsList.insertAdjacentHTML('beforeend',
+      '<p class="hint text-error">Duplicate builds — duplicates are ignored in calculations.</p>');
+  }
 }
 
 export function renderModeToggle(mode) {
@@ -111,15 +118,19 @@ export function renderMultiZonePlan() {
     validZones: getValidZonesForEssence(b)
   }));
 
+  // Deduplicate — each unique essence is counted once in the math
+  const uniqueEssences = deduplicateBuilds(essenceZones);
+  const hasDuplicates = uniqueEssences.length < essenceZones.length;
+
   // Check for impossible essences
-  const impossible = essenceZones.filter(e => e.validZones.length === 0);
+  const impossible = uniqueEssences.filter(e => e.validZones.length === 0);
   if (impossible.length > 0) {
     elements.farmingPlan.innerHTML = `<p class="no-zones-msg">No zone can drop: ${impossible.map(e => `${e.attribute}/${e.secondary}/${e.skill}`).join(', ')}</p>`;
     return;
   }
 
   // Greedy algorithm: assign essences to zones for best efficiency
-  const remaining = [...essenceZones];
+  const remaining = [...uniqueEssences];
   const plan = [];
   const optimizeMode = getOptimizeMode();
 
@@ -177,7 +188,11 @@ export function renderMultiZonePlan() {
     byZone[p.zoneId].push(p);
   });
 
-  elements.farmingPlan.innerHTML = Object.entries(byZone).map(([zoneId, configs]) => {
+  const dupWarning = hasDuplicates
+    ? '<p class="hint text-error">Duplicate builds ignored — each unique essence is counted once.</p>'
+    : '';
+
+  elements.farmingPlan.innerHTML = dupWarning + Object.entries(byZone).map(([zoneId, configs]) => {
     const zone = ESSENCE_ZONES[zoneId];
 
     const configsHtml = configs.map(p => {
@@ -214,6 +229,7 @@ export function renderMultiZonePlan() {
 
 export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   const builds = getBuilds();
+  const unique = deduplicateBuilds(builds);
   const essencesPerRun = getVal('essencesPerRun');
   const sanityCost = getVal('sanityCost');
   const selectedZone = getSelectedZone();
@@ -222,8 +238,8 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   // Calculate zone validity
   const zoneResults = [];
   for (const [zoneId, zone] of Object.entries(ESSENCE_ZONES)) {
-    const requiredSecs = new Set(builds.map(b => b.secondary));
-    const requiredSkills = new Set(builds.map(b => b.skill));
+    const requiredSecs = new Set(unique.map(b => b.secondary));
+    const requiredSkills = new Set(unique.map(b => b.skill));
     const hasAllSecs = [...requiredSecs].every(s => zone.secondaries.includes(s));
     const hasAllSkills = [...requiredSkills].every(s => zone.skills.includes(s));
     zoneResults.push({ zoneId, zone, isValid: hasAllSecs && hasAllSkills });
@@ -258,10 +274,10 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
   const secPool = zone.secondaries.length;
   const skillPool = zone.skills.length;
 
-  const secConfig = findBestTicketConfig(builds, 'secondary');
-  const skillConfig = findBestTicketConfig(builds, 'skill');
+  const secConfig = findBestTicketConfig(unique, 'secondary');
+  const skillConfig = findBestTicketConfig(unique, 'skill');
 
-  const probNoTicket = builds.length * (1 / ATTR_POOL) * (1 / secPool) * (1 / skillPool);
+  const probNoTicket = unique.length * (1 / ATTR_POOL) * (1 / secPool) * (1 / skillPool);
   const probSecTicket = secConfig.count * (1 / ATTR_TICKET_POOL) * 1 * (1 / skillPool);
   const probSkillTicket = skillConfig.count * (1 / ATTR_TICKET_POOL) * (1 / secPool) * 1;
 
@@ -288,11 +304,11 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_POOL)} × ${frac(secPool)} × ${frac(skillPool)} =</span> ${(probNoTicket * 100).toFixed(2)}%</span>
       </div>
       <div class="list-item ${selectedTicket === 'secondary' ? 'selected' : ''}" data-ticket="secondary">
-        <span class="ticket-option-name">Lock ${secConfig.stats.join('/')} (${secConfig.count}/${builds.length} essences)</span>
+        <span class="ticket-option-name">Lock ${secConfig.stats.join('/')} (${secConfig.count}/${unique.length} essences)</span>
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × 1 × ${frac(skillPool)} =</span> ${(probSecTicket * 100).toFixed(2)}%</span>
       </div>
       <div class="list-item ${selectedTicket === 'skill' ? 'selected' : ''}" data-ticket="skill">
-        <span class="ticket-option-name">Lock ${skillConfig.stats.join('/')} (${skillConfig.count}/${builds.length} essences)</span>
+        <span class="ticket-option-name">Lock ${skillConfig.stats.join('/')} (${skillConfig.count}/${unique.length} essences)</span>
         <span class="ticket-option-prob"><span class="prob-calc">${frac(ATTR_TICKET_POOL)} × ${frac(secPool)} × 1 =</span> ${(probSkillTicket * 100).toFixed(2)}%</span>
       </div>
     </div>

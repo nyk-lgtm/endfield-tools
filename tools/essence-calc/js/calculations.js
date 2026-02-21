@@ -118,3 +118,13 @@ export function calculateConfidenceRuns(confidence, pRunMiss) {
   if (1 - pRunMiss <= 0) return Infinity;
   return Math.ceil(Math.log(1 - confidence) / Math.log(pRunMiss));
 }
+
+export function deduplicateBuilds(builds) {
+  const seen = new Set();
+  return builds.filter(b => {
+    const key = `${b.attribute}|${b.secondary}|${b.skill}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
