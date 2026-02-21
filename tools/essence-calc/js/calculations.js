@@ -114,6 +114,7 @@ export function calculatePlanStats(prob, essencesPerRun, sanityCost) {
 }
 
 export function calculateConfidenceRuns(confidence, pRunMiss) {
+  if (pRunMiss === 0) return 1;
   if (1 - pRunMiss <= 0) return Infinity;
   return Math.ceil(Math.log(1 - confidence) / Math.log(pRunMiss));
 }

@@ -88,6 +88,8 @@ export function renderBuilds(onUpdate, onRemove) {
 export function renderModeToggle(mode) {
   elements.modeSingle.classList.toggle('active', mode === 'single');
   elements.modeMulti.classList.toggle('active', mode === 'multi');
+  elements.modeSingle.setAttribute('aria-pressed', mode === 'single');
+  elements.modeMulti.setAttribute('aria-pressed', mode === 'multi');
   elements.singleModeResults.style.display = mode === 'single' ? 'block' : 'none';
   elements.multiModeResults.style.display = mode === 'multi' ? 'block' : 'none';
 }
