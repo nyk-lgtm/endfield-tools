@@ -4,7 +4,7 @@ import {
   removeBuild as stateRemoveBuild,
   updateBuild as stateUpdateBuild,
   setSelectedZone, setSelectedTicket,
-  getSelectedZone, setOptimizeMode
+  getSelectedZone, setOptimizeMode, getOptimizeMode
 } from './state.js';
 import { ESSENCE_ZONES } from '../../../data/index.js';
 import {
@@ -93,9 +93,14 @@ function init() {
   initNav();
   initHelpModal();
 
+  // Sync saved state to UI
+  const mode = getCurrentMode();
+  renderModeToggle(mode);
+  document.getElementById('optimizeMode').value = getOptimizeMode();
+
   // Initial render
   renderBuilds(handleUpdateBuild, handleRemoveBuild);
-  renderMultiZonePlan();
+  recalculate();
 }
 
 document.addEventListener('DOMContentLoaded', init);

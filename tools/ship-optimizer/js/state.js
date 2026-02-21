@@ -1,4 +1,7 @@
 import { CHARACTERS } from '../../../data/index.js';
+import { save, load } from '../../../shared/storage.js';
+
+const TOOL = 'ship-optimizer';
 
 // Initialize elite levels for all characters (default to 'e4')
 function initEliteLevels() {
@@ -9,43 +12,72 @@ function initEliteLevels() {
   return levels;
 }
 
-let state = {
-  // Room configuration: [Control Nexus, Reception Room, room3, room4, room5]
-  rooms: [
-    'Control Nexus',
-    'Reception Room',
-    'Manufacturing Cabin',
-    'Manufacturing Cabin',
-    'Manufacturing Cabin'
-  ],
-  // Production targets for each room (index 2-4 are configurable)
-  roomTargets: {
-    2: 'Weapon EXP',
-    3: 'Weapon EXP',
-    4: 'Weapon EXP'
-  },
-  // Elite levels for ALL characters: { name: 'e4' | 'e3' | 'e2' | 'e1' }
-  eliteLevels: initEliteLevels(),
-  // Selected character names (Set-like object)
-  selectedCharacters: {},
-  results: null,
-  // Raw assignment for drag-and-drop recalculation
-  assignment: null,
-  // Config used for optimization (for recalculation)
-  optimizerConfig: null
-};
+function loadState() {
+  const saved = load(TOOL, 'state');
+  const defaults = {
+    rooms: ['Control Nexus', 'Reception Room', 'Manufacturing Cabin', 'Manufacturing Cabin', 'Manufacturing Cabin'],
+    roomTargets: { 2: 'Weapon EXP', 3: 'Weapon EXP', 4: 'Weapon EXP' },
+    eliteLevels: initEliteLevels(),
+    selectedCharacters: {},
+  };
+
+  if (!saved) return { ...defaults, results: null, assignment: null, optimizerConfig: null };
+
+  // Merge saved elite levels with current character list (handles new characters)
+  const eliteLevels = initEliteLevels();
+  if (saved.eliteLevels) {
+    for (const [name, level] of Object.entries(saved.eliteLevels)) {
+      if (name in eliteLevels) eliteLevels[name] = level;
+    }
+  }
+
+  // Filter selected characters to only include valid ones
+  const selectedCharacters = {};
+  if (saved.selectedCharacters) {
+    for (const name of Object.keys(saved.selectedCharacters)) {
+      if (name in CHARACTERS) selectedCharacters[name] = true;
+    }
+  }
+
+  return {
+    rooms: saved.rooms || defaults.rooms,
+    roomTargets: saved.roomTargets || defaults.roomTargets,
+    eliteLevels,
+    selectedCharacters,
+    results: null,
+    assignment: null,
+    optimizerConfig: null,
+  };
+}
+
+function persist() {
+  save(TOOL, 'state', {
+    rooms: state.rooms,
+    roomTargets: state.roomTargets,
+    eliteLevels: state.eliteLevels,
+    selectedCharacters: state.selectedCharacters,
+  });
+}
+
+let state = loadState();
 
 export function getRooms() {
   return state.rooms;
 }
 
 export function setRoom(index, type) {
+  const prevType = state.rooms[index];
   state.rooms[index] = type;
   if (type === 'Manufacturing Cabin') {
-    state.roomTargets[index] = 'Weapon EXP';
+    if (prevType !== 'Manufacturing Cabin') {
+      state.roomTargets[index] = 'Weapon EXP';
+    }
   } else if (type === 'Growth Chamber') {
-    state.roomTargets[index] = ['Fungal Matter', 'Plant', 'Rare Mineral'];
+    if (prevType !== 'Growth Chamber' || !Array.isArray(state.roomTargets[index])) {
+      state.roomTargets[index] = ['Fungal Matter', 'Plant', 'Rare Mineral'];
+    }
   }
+  persist();
 }
 
 export function getRoomTargets() {
@@ -58,6 +90,7 @@ export function getRoomTarget(index) {
 
 export function setRoomTarget(index, target) {
   state.roomTargets[index] = target;
+  persist();
 }
 
 // Character selection
@@ -67,20 +100,24 @@ export function isCharacterSelected(name) {
 
 export function selectCharacter(name) {
   state.selectedCharacters[name] = true;
+  persist();
 }
 
 export function deselectCharacter(name) {
   delete state.selectedCharacters[name];
+  persist();
 }
 
 export function selectAllCharacters() {
   for (const name of Object.keys(CHARACTERS)) {
     state.selectedCharacters[name] = true;
   }
+  persist();
 }
 
 export function deselectAllCharacters() {
   state.selectedCharacters = {};
+  persist();
 }
 
 // Elite levels (separate from selection)
@@ -90,12 +127,14 @@ export function getEliteLevel(name) {
 
 export function setEliteLevel(name, level) {
   state.eliteLevels[name] = level;
+  persist();
 }
 
 export function setAllEliteLevels(level) {
   for (const name of Object.keys(CHARACTERS)) {
     state.eliteLevels[name] = level;
   }
+  persist();
 }
 
 export function getAllEliteLevels() {

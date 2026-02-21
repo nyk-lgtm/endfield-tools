@@ -1,17 +1,38 @@
 import { ATTRIBUTES, ALL_SECONDARIES, ALL_SKILLS } from '../../../data/index.js';
+import { save, load } from '../../../shared/storage.js';
 
-let plannerBuilds = [
-  { attribute: "Agility", secondary: "Attack", skill: "Flow" },
-];
+const TOOL = 'essence-calc';
 
-let calcBuilds = [
-  { attribute: "Agility", secondary: "Attack", skill: "Flow" },
-];
+function isValidBuild(b) {
+  return b && ATTRIBUTES.includes(b.attribute)
+    && ALL_SECONDARIES.includes(b.secondary)
+    && ALL_SKILLS.includes(b.skill);
+}
+
+function defaultBuild() {
+  return { attribute: ATTRIBUTES[0], secondary: ALL_SECONDARIES[0], skill: ALL_SKILLS[0] };
+}
+
+function loadBuilds(key) {
+  const saved = load(TOOL, key);
+  if (Array.isArray(saved) && saved.length > 0 && saved.every(isValidBuild)) {
+    return saved;
+  }
+  return [defaultBuild()];
+}
+
+let plannerBuilds = loadBuilds('plannerBuilds');
+let calcBuilds = loadBuilds('calcBuilds');
 
 let selectedZone = null;
 let selectedTicket = "none";
-let currentMode = "multi";
-let optimizeMode = "sanity"; // "sanity" | "probability" | "zones"
+let currentMode = load(TOOL, 'mode') || "multi";
+let optimizeMode = load(TOOL, 'optimizeMode') || "sanity";
+
+function persistBuilds() {
+  save(TOOL, 'plannerBuilds', plannerBuilds);
+  save(TOOL, 'calcBuilds', calcBuilds);
+}
 
 // State accessors
 export function getBuilds() {
@@ -40,6 +61,7 @@ export function getCurrentMode() {
 
 export function setCurrentMode(mode) {
   currentMode = mode;
+  save(TOOL, 'mode', mode);
 }
 
 export function getOptimizeMode() {
@@ -48,16 +70,14 @@ export function getOptimizeMode() {
 
 export function setOptimizeMode(mode) {
   optimizeMode = mode;
+  save(TOOL, 'optimizeMode', mode);
 }
 
 // Build mutations
 export function addBuild() {
-  getBuilds().push({
-    attribute: ATTRIBUTES[0],
-    secondary: ALL_SECONDARIES[0],
-    skill: ALL_SKILLS[0]
-  });
+  getBuilds().push(defaultBuild());
   selectedZone = null;
+  persistBuilds();
 }
 
 export function removeBuild(index) {
@@ -65,6 +85,7 @@ export function removeBuild(index) {
   if (builds.length > 1) {
     builds.splice(index, 1);
     selectedZone = null;
+    persistBuilds();
     return true;
   }
   return false;
@@ -73,4 +94,5 @@ export function removeBuild(index) {
 export function updateBuild(index, field, value) {
   getBuilds()[index][field] = value;
   selectedZone = null;
+  persistBuilds();
 }
