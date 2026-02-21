@@ -217,8 +217,8 @@ function scoreCharacterForRoom(charName, roomType, maxElite, currentMoodDrop, gl
 /**
  * Greedy assignment with fixed Control Nexus configuration
  */
-function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
-  const availableChars = new Set(Object.keys(selectedCharacters));
+function greedyAssignment(eliteLevels, rooms, roomTargets, fixedNexus) {
+  const availableChars = new Set(Object.keys(eliteLevels));
   const assignment = rooms.map(() => []);
   const controlNexusIndex = rooms.indexOf('Control Nexus');
 
@@ -229,7 +229,7 @@ function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
 
   let globalMoodRegen = 0;
   for (const charName of assignment[controlNexusIndex]) {
-    const talents = getCharacterTalentsForCabin(charName, 'Control Nexus', selectedCharacters[charName]);
+    const talents = getCharacterTalentsForCabin(charName, 'Control Nexus', eliteLevels[charName]);
     for (const t of talents) {
       if (t.stat === 'Mood Regen') globalMoodRegen += t.value;
     }
@@ -237,7 +237,7 @@ function greedyAssignment(selectedCharacters, rooms, roomTargets, fixedNexus) {
 
   for (let i = 0; i < rooms.length; i++) {
     if (i === controlNexusIndex) continue;
-    assignRoomGreedy(i, rooms[i], assignment, availableChars, selectedCharacters, globalMoodRegen, roomTargets[i]);
+    assignRoomGreedy(i, rooms[i], assignment, availableChars, eliteLevels, globalMoodRegen, roomTargets[i]);
   }
 
   return assignment;
