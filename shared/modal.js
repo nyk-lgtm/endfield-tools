@@ -27,5 +27,23 @@ export function initHelpModal() {
   if (closeBtn) closeBtn.addEventListener('click', () => toggle(false));
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') toggle(false);
+
+    if (e.key === 'Tab' && modal.classList.contains('open')) {
+      const focusable = [...modalContent.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      )].filter(el => !el.hidden && el.offsetParent !== null);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
   });
 }
