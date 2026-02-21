@@ -11,23 +11,22 @@
   <div class="container">
     <div class="title-row">
       <h1>Essence Farming Calculator</h1>
-      <button class="btn-icon help-btn">?</button>
+      <button class="btn-icon help-btn" aria-label="Help">?</button>
     </div>
-    <br>
     <div class="config-grid">
       <div>
-        <label>Essences / Run</label>
+        <label for="essencesPerRun">Essences / Run</label>
         <input type="number" id="essencesPerRun" value="3" min="1">
       </div>
       <div>
-        <label>Sanity / Run</label>
+        <label for="sanityCost">Sanity / Run</label>
         <input type="number" id="sanityCost" value="80" min="1">
       </div>
     </div>
 
-    <div class="toggle-group">
-      <button class="toggle-btn active" id="modeMulti">Planner</button>
-      <button class="toggle-btn" id="modeSingle">Calc</button>
+    <div class="toggle-group" role="group" aria-label="Calculator mode">
+      <button class="toggle-btn active" id="modeMulti" aria-pressed="true">Planner</button>
+      <button class="toggle-btn" id="modeSingle" aria-pressed="false">Calc</button>
     </div>
 
     <div class="builds-section">

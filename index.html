@@ -15,36 +15,36 @@
       margin-bottom: 8px;
     }
     .hero p {
-      color: #888888;
+      color: var(--color-text-muted);
       font-size: 14px;
     }
     .tools-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(2, 1fr);
       gap: 12px;
     }
     @media (max-width: 600px) {
       .tools-grid { grid-template-columns: 1fr; }
     }
     .tool-card {
-      background: #141414;
-      border: 1px solid #2a2a2a;
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border);
       border-radius: 10px;
       padding: 16px;
       text-decoration: none;
       transition: border-color 0.15s, transform 0.15s;
     }
     .tool-card:hover {
-      border-color: #feff42;
+      border-color: var(--color-accent);
       transform: translateY(-2px);
     }
     .tool-card h2 {
-      color: #feff42;
+      color: var(--color-accent);
       font-size: 18px;
       margin: 0 0 8px 0;
     }
     .tool-card p {
-      color: #888888;
+      color: var(--color-text-muted);
       font-size: 13px;
       margin: 0;
       line-height: 1.5;
@@ -53,14 +53,18 @@
 </head>
 <body>
   <div class="container">
+    <div class="hero">
+      <h1>Endfield Tools</h1>
+      <p>Arknights: Endfield planning utilities</p>
+    </div>
     <div class="tools-grid">
       <a href="tools/essence-calc/" class="tool-card">
         <h2>Essence Calc</h2>
-        <p>Find optimal zones and ticket configs.</p>
+        <p>Find optimal zones and ticket configurations for essence farming.</p>
       </a>
       <a href="tools/ship-optimizer/" class="tool-card">
         <h2>Ship Optimizer</h2>
-        <p>Based on available characters.</p>
+        <p>Optimize operator-to-cabin assignments for maximum ship efficiency.</p>
       </a>
     </div>
   </div>

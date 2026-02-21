@@ -16,6 +16,9 @@
   --color-border: #2a2a2a;
   --color-border-strong: #333333;
   --color-border-hover: #444444;
+  --color-bg-dark: #0f0f0f;
+  --color-border-accent: #3a3a1a;
+  --color-bg-disabled-border: #222222;
   --color-error: #ff6666;
   --color-success: #4ade80;
   --color-overlay: rgba(0, 0, 0, 0.8);
@@ -37,7 +40,7 @@ body {
 /* Typography */
 h1 { font-size: 22px; font-weight: 700; color: var(--color-accent); margin-bottom: 4px; letter-spacing: 0.5px; }
 h2 { font-size: 16px; color: var(--color-white); margin: 0; }
-h3 { font-size: 14px; color: #999999; margin-bottom: 10px; }
+h3 { font-size: 14px; color: var(--color-text-muted); margin-bottom: 10px; }
 
 label { font-size: 11px; color: var(--color-text-muted); text-transform: uppercase; letter-spacing: 1px; display: block; }
 
@@ -71,11 +74,11 @@ select:focus, input[type="number"]:focus {
 .btn-primary {
   background: var(--color-bg-accent);
   color: var(--color-accent);
-  border-color: #3a3a1a;
+  border-color: var(--color-border-accent);
 }
 
-.btn-primary:hover { background: #2a2a1a; border-color: var(--color-accent); }
-.btn-primary:disabled { background: var(--color-bg-input); color: var(--color-border-hover); border-color: #222222; cursor: not-allowed; }
+.btn-primary:hover { background: var(--color-border-accent); border-color: var(--color-accent); }
+.btn-primary:disabled { background: var(--color-bg-input); color: var(--color-border-hover); border-color: var(--color-bg-disabled-border); cursor: not-allowed; }
 
 .btn-secondary {
   background: var(--color-bg-element);
@@ -84,7 +87,7 @@ select:focus, input[type="number"]:focus {
 }
 
 .btn-secondary:hover { color: var(--color-text-secondary); border-color: var(--color-border-hover); }
-.btn-secondary:disabled { background: var(--color-bg-input); color: var(--color-border-hover); border-color: #222222; cursor: not-allowed; }
+.btn-secondary:disabled { background: var(--color-bg-input); color: var(--color-border-hover); border-color: var(--color-bg-disabled-border); cursor: not-allowed; }
 
 .btn-icon {
   width: 24px;
@@ -222,7 +225,7 @@ td { padding: 8px 12px; color: var(--color-text-secondary); border-bottom: 1px s
 }
 
 .list-item:hover { border-color: var(--color-border-hover); }
-.list-item.selected { border-color: var(--color-accent); background: #1a1a10; }
+.list-item.selected { border-color: var(--color-accent); background: var(--color-bg-accent); }
 .list-item.disabled { opacity: 0.4; cursor: not-allowed; }
 
 /* Toggle buttons */
@@ -244,19 +247,21 @@ td { padding: 8px 12px; color: var(--color-text-secondary); border-bottom: 1px s
 }
 
 .toggle-btn:first-child { border-radius: 6px 0 0 6px; }
-.toggle-btn:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+.toggle-btn:last-child { border-radius: 0 6px 6px 0; }
+.toggle-btn + .toggle-btn { margin-left: -1px; }
 
 .toggle-btn.active {
-  background: #1a1a10;
+  background: var(--color-bg-accent);
   border-color: var(--color-accent);
   color: var(--color-accent);
-  border-left: 1px solid var(--color-accent);
+  position: relative;
+  z-index: 1;
 }
 
 .toggle-btn:not(.active):hover { border-color: var(--color-border-hover); color: var(--color-text-secondary); }
 
 /* Title row */
-.title-row { display: flex; align-items: center; justify-content: space-between; }
+.title-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
 .title-row h1 { margin: 0; }
 
 /* Toast */
