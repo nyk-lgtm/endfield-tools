@@ -389,10 +389,8 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
     return Object.keys(eliteLevels).filter(name => !assigned.has(name));
   };
 
-  while (improved && iterations < maxIterations) {
-    improved = false;
-    iterations++;
-
+  function tryPairwiseSwaps() {
+    let found = false;
     for (let roomA = 0; roomA < rooms.length; roomA++) {
       for (let roomB = roomA + 1; roomB < rooms.length; roomB++) {
         for (let slotA = 0; slotA < assignment[roomA].length; slotA++) {
@@ -410,7 +408,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 
             if (newEfficiency > bestEfficiency + EFFICIENCY_EPSILON) {
               commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
-              improved = true;
+              found = true;
               swapsMade++;
             } else {
               assignment[roomA][slotA] = charA;
@@ -420,7 +418,11 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
         }
       }
     }
+    return found;
+  }
 
+  function tryUnassignedSwaps() {
+    let found = false;
     const unassigned = getUnassignedChars();
     for (let roomIdx = 0; roomIdx < rooms.length; roomIdx++) {
       const roomType = rooms[roomIdx];
@@ -481,7 +483,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
             const affected = [roomIdx];
             if (bestPlacement) affected.push(bestPlacement.room);
             commitSwap(affected, bestNewEfficiency, bestNewMoodRegen);
-            improved = true;
+            found = true;
             swapsMade++;
             break;
           } else {
@@ -489,12 +491,16 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
           }
         }
 
-        if (improved) break;
+        if (found) break;
       }
 
-      if (improved) break;
+      if (found) break;
     }
+    return found;
+  }
 
+  function tryCrossRoomMoves() {
+    let found = false;
     for (let roomA = 0; roomA < rooms.length; roomA++) {
       for (let roomB = 0; roomB < rooms.length; roomB++) {
         if (roomA === roomB) continue;
@@ -513,7 +519,7 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
 
           if (newEfficiency > bestEfficiency + EFFICIENCY_EPSILON) {
             commitSwap([roomA, roomB], newEfficiency, newMoodRegen);
-            improved = true;
+            found = true;
             swapsMade++;
           } else {
             assignment[roomB].pop();
@@ -522,6 +528,15 @@ function iterativeImprovement(assignment, rooms, roomTargets, eliteLevels, maxIt
         }
       }
     }
+    return found;
+  }
+
+  while (improved && iterations < maxIterations) {
+    improved = false;
+    iterations++;
+    improved = tryPairwiseSwaps() || improved;
+    improved = tryUnassignedSwaps() || improved;
+    improved = tryCrossRoomMoves() || improved;
   }
 
   return { assignment, iterations, swapsMade, finalEfficiency: bestEfficiency };
