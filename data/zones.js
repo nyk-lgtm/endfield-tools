@@ -1,6 +1,3 @@
-// Zone definitions with their available skills and secondaries
-// Each zone has 8 skills and 8 secondaries that can drop there
-
 export const ESSENCE_ZONES = {
   "the-hub": {
     name: "The Hub",

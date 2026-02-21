@@ -4,8 +4,9 @@
 export const LAST_UPDATED = '2026-02-21';
 
 export { ESSENCE_ZONES } from './zones.js';
-export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from './constants.js';
-export { CHARACTERS, CABINS } from './characters.js';
+export { PROTOCOL_SPACES } from './protocol-spaces.js';
+export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY, ITEM_VALUES } from './constants.js';
+export { CHARACTERS, CABINS, SHIP_STAT_TYPES } from './characters.js';
 export { ORIGEOMETRY_TOPUP } from './store-packs.js';
 export { PROTOCOL_PASS_S1 } from './protocol-pass/s1.js';
 
