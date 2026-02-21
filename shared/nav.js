@@ -2,12 +2,15 @@
 const ROOT = new URL('..', import.meta.url).href;
 
 export function initNav() {
+  const titleRow = document.querySelector('.title-row');
+  if (!titleRow) return;
+
   const link = document.createElement('a');
   link.href = ROOT;
   link.className = 'home-btn';
   link.textContent = '<';
   link.title = 'Back to tools';
+  link.setAttribute('aria-label', 'Back to tools');
 
-  const titleRow = document.querySelector('.title-row');
   titleRow.prepend(link);
 }
