@@ -256,18 +256,8 @@ function handleDrop(e) {
     } else {
       const dstSlot = parseInt(dropTarget.dataset.slot);
       if (isNaN(dstSlot) || dstSlot >= assignment[dstRoom].length) return;
-      const displaced = assignment[dstRoom][dstSlot];
       removeFromAssignment(assignment, name);
       assignment[dstRoom][dstSlot] = name;
-      // Place displaced operator in first room with space, otherwise they become unassigned
-      if (displaced) {
-        for (let i = 0; i < assignment.length; i++) {
-          if (assignment[i].length < MAX_OPERATORS_PER_ROOM) {
-            assignment[i].push(displaced);
-            break;
-          }
-        }
-      }
     }
   } else {
     const srcRoom = sourceData.roomIndex;
