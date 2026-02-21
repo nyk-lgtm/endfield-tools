@@ -3,7 +3,7 @@
 
 export { ESSENCE_ZONES } from './zones.js';
 export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from './constants.js';
-export { CHARACTERS, CABINS, SHIP_STAT_TYPES } from './characters.js';
+export { CHARACTERS, CABINS } from './characters.js';
 
 // Derived data
 import { ESSENCE_ZONES } from './zones.js';

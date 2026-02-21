@@ -183,18 +183,3 @@ export const CABINS = [
   "Control Nexus",
   "Reception Room"
 ];
-
-export const SHIP_STAT_TYPES = {
-  production: ["Weapon EXP", "Operator EXP", "Fungal Matter", "Plant", "Rare Mineral"],
-  mood: ["Slow Mood Drop", "Mood Regen"],
-  clue: [
-    "Clue 1 Rate-UP",
-    "Clue 2 Rate-UP",
-    "Clue 3 Rate-UP",
-    "Clue 4 Rate-UP",
-    "Clue 5 Rate-UP",
-    "Clue 6 Rate-UP",
-    "Clue 7 Rate-UP",
-    "Clue Collecting Efficiency"
-  ]
-};
