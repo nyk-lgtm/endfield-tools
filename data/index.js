@@ -6,6 +6,8 @@ export const LAST_UPDATED = '2026-02-21';
 export { ESSENCE_ZONES } from './zones.js';
 export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from './constants.js';
 export { CHARACTERS, CABINS } from './characters.js';
+export { ORIGEOMETRY_TOPUP } from './store-packs.js';
+export { PROTOCOL_PASS_S1 } from './protocol-pass/s1.js';
 
 // Derived data
 import { ESSENCE_ZONES } from './zones.js';
