@@ -65,7 +65,7 @@ export function renderBuilds(onUpdate, onRemove) {
           ${ALL_SKILLS.map(s => `<option value="${s}" ${b.skill === s ? 'selected' : ''}>${s}</option>`).join('')}
         </select>
       </div>
-      <button class="btn-remove" data-index="${i}" ${builds.length <= 1 ? 'disabled' : ''}>✕</button>
+      <button class="btn btn-secondary btn-remove" data-index="${i}" ${builds.length <= 1 ? 'disabled' : ''}>✕</button>
     </div>
   `).join('');
 

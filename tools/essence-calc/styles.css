@@ -44,20 +44,8 @@
   border: 1px solid var(--color-border);
 }
 
-.btn-remove {
-  background: var(--color-bg-element);
-  color: var(--color-text-muted);
-  border: 1px solid var(--color-border-strong);
-  border-radius: 6px;
-  padding: 8px 10px;
-  cursor: pointer;
-  font-size: 14px;
-  align-self: end;
-  height: fit-content;
-}
-
+.btn-remove { align-self: end; height: fit-content; }
 .btn-remove:hover { color: var(--color-error); border-color: var(--color-error); }
-.btn-remove:disabled { background: var(--color-bg-input); color: var(--color-border-hover); border-color: var(--color-bg-disabled-border); cursor: not-allowed; }
 
 /* Zone list */
 .zone-list { display: flex; flex-direction: column; gap: 6px; }
