@@ -1,6 +1,8 @@
 // Central data export
 // Import from here: import { ESSENCE_ZONES, ATTRIBUTES, ... } from '../../data/index.js'
 
+export const LAST_UPDATED = '2026-02-21';
+
 export { ESSENCE_ZONES } from './zones.js';
 export { ATTRIBUTES, ATTR_POOL, ATTR_TICKET_POOL, SECONDS_PER_SANITY, SECONDS_PER_DAY } from './constants.js';
 export { CHARACTERS, CABINS } from './characters.js';
