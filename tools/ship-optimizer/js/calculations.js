@@ -69,7 +69,8 @@ export function getCharacterTalentsForCabin(charName, cabin, maxElite = 'e4') {
  * Calculate uptime based on mood stats
  */
 export function calculateUptime(slowMoodDrop, moodRegen) {
-  const effectiveDrop = BASE_MOOD_DROP * (1 - slowMoodDrop / 100);
+  const clampedDrop = Math.min(slowMoodDrop, 99);
+  const effectiveDrop = BASE_MOOD_DROP * (1 - clampedDrop / 100);
   const effectiveRegen = BASE_MOOD_REGEN * (1 + moodRegen / 100);
 
   const workHours = 100 / effectiveDrop;
@@ -206,9 +207,9 @@ function scoreCharacterForRoom(charName, roomType, maxElite, currentMoodDrop, gl
   const newUptime = calculateUptime(currentMoodDrop + moodValue, globalMoodRegen);
   const uptimeGain = newUptime - currentUptime;
 
-  // Score: production value + uptime gain weighted by base efficiency
-  // A 1% uptime gain on 220% efficiency = 2.2% effective gain
-  const score = productionValue + (uptimeGain * 100 * 2.2);
+  // Score: production value + uptime gain weighted by full-room base efficiency
+  const fullRoomBase = (BASE_EFFICIENCY + OPERATOR_BONUS * MAX_OPERATORS_PER_ROOM) / 100;
+  const score = productionValue + (uptimeGain * 100 * fullRoomBase);
 
   return { score, talents, productionValue, moodValue };
 }
@@ -667,8 +668,15 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     });
   }
 
-  // Calculate summary stats
-  const uptime = calculateUptime(0, globalMoodRegen) * 100;
+  // Calculate summary stats — weighted average uptime across production rooms
+  const productionRoomsForUptime = roomResults.filter(r =>
+    r.name === 'Manufacturing Cabin' || r.name === 'Growth Chamber' || r.name === 'Reception Room'
+  );
+  const uptime = productionRoomsForUptime.length > 0
+    ? productionRoomsForUptime.reduce((sum, r) =>
+        sum + calculateUptime(r.slowMoodDrop, globalMoodRegen) * 100, 0
+      ) / productionRoomsForUptime.length
+    : calculateUptime(0, globalMoodRegen) * 100;
 
   const productionRooms = roomResults.filter(r =>
     r.name === 'Manufacturing Cabin' || r.name === 'Growth Chamber'

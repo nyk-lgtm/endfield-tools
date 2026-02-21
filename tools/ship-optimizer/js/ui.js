@@ -67,8 +67,9 @@ export function renderRoomConfig(container) {
 // Get a summary of character's cabin types for display
 function getCharacterCabinSummary(charData) {
   const cabins = new Set();
-  cabins.add(charData.ship_talents.e1.cabin);
-  cabins.add(charData.ship_talents.e2.cabin);
+  for (const talent of Object.values(charData.ship_talents)) {
+    cabins.add(talent.cabin);
+  }
   return [...cabins].map(c => c.replace(' Cabin', '').replace(' Chamber', '').replace(' Room', '')).join(', ');
 }
 
