@@ -595,28 +595,28 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     const operatorResults = operators.map(charName => {
       const talents = getCharacterTalentsForCabin(charName, roomType, eliteLevels[charName] || 'e4');
       const stats = [];
-      let minElite = 'e1';
+      let requiredElite = 'e1';
 
       for (const talent of talents) {
         if (relevantStats.includes(talent.stat)) {
           productionBonus += talent.value;
           stats.push({ stat: talent.stat, value: talent.value });
-          if (talent.elite > minElite) minElite = talent.elite;
+          if (talent.elite > requiredElite) requiredElite = talent.elite;
         } else if (talent.stat === 'Slow Mood Drop') {
           slowMoodDrop += talent.value;
           stats.push({ stat: 'Mood Drop', value: -talent.value });
-          if (talent.elite > minElite) minElite = talent.elite;
+          if (talent.elite > requiredElite) requiredElite = talent.elite;
         } else if (talent.stat === 'Mood Regen' && roomType === 'Control Nexus') {
           productionBonus += talent.value;
           stats.push({ stat: talent.stat, value: talent.value });
-          if (talent.elite > minElite) minElite = talent.elite;
+          if (talent.elite > requiredElite) requiredElite = talent.elite;
         }
       }
 
       return {
         name: charName,
         stats: stats.length > 0 ? stats : [{ stat: 'No matching talent', value: 0 }],
-        elite: stats.length > 0 ? minElite : 'e1'
+        elite: stats.length > 0 ? requiredElite : 'e1'
       };
     });
 
