@@ -88,7 +88,7 @@ export function renderBuilds(onUpdate, onRemove) {
   const unique = deduplicateBuilds(builds);
   if (unique.length < builds.length) {
     elements.buildsList.insertAdjacentHTML('beforeend',
-      '<p class="hint text-error">Duplicate builds — duplicates are ignored in calculations.</p>');
+      '<p class="hint text-error">Duplicate essences — duplicates are ignored in calculations.</p>');
   }
 }
 
