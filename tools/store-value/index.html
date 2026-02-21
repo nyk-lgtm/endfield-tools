@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Store Value</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="title-row">
+      <h1>Store Value</h1>
+      <button class="btn-icon help-btn">?</button>
+    </div>
+
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-view="topup">Topup Packs</button>
+      <button class="toggle-btn" data-view="pass">Protocol Pass</button>
+    </div>
+
+    <!-- Topup Panel -->
+    <div id="topupPanel" class="card">
+      <h2>Origeometry Topup Packs</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Pack</th>
+            <th>Price</th>
+            <th>Amount</th>
+            <th>Rate</th>
+            <th>Cost/Unit</th>
+            <th>Bought</th>
+          </tr>
+        </thead>
+        <tbody id="topupBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Pass Panel -->
+    <div id="passPanel" class="card" hidden>
+      <h2>Protocol Pass Rewards</h2>
+      <div class="pass-controls">
+        <label>Season</label>
+        <select id="seasonSelect">
+          <option value="s1">S1 — Awaken</option>
+        </select>
+      </div>
+
+      <h3>Cumulative Totals by Tier</h3>
+      <div id="tierCards" class="tier-cards"></div>
+
+      <h3>What Each Upgrade Adds</h3>
+      <div id="upgradeCards" class="upgrade-cards"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <button class="modal-close">&times;</button>
+      <h2>Math</h2>
+
+      <p><strong>Topup Packs</strong></p>
+      <p>Each pack has a one-time first-buy bonus. After that you get the base + standard bonus.</p>
+      <p><code>Rate = Origeometry / USD (higher is better)</code></p>
+      <p><code>Cost/Unit = USD / Origeometry (lower is better)</code></p>
+
+      <p><strong>Protocol Pass</strong></p>
+      <p>Tiers are additive: buying Customized gives you Basic + Originium + Customized rewards.</p>
+      <p>The upgrade cards show what each tier adds on top of the previous tier.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

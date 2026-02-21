@@ -1,0 +1,105 @@
+/* Checkbox accent */
+input[type="checkbox"] {
+  accent-color: var(--color-accent);
+}
+
+/* Best-value row highlight */
+.best-value td {
+  background: var(--color-bg-accent);
+  color: var(--color-accent);
+}
+
+/* Pass controls */
+.pass-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.pass-controls select {
+  width: auto;
+  min-width: 160px;
+}
+
+/* Tier cards grid */
+.tier-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.tier-card {
+  background: var(--color-bg-element);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 14px;
+}
+
+.tier-card-header {
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tier-card-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-white);
+  margin-bottom: 2px;
+}
+
+.tier-card-cost {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+/* Upgrade cards grid */
+.upgrade-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+/* Reward categories inside cards */
+.reward-category {
+  margin-bottom: 10px;
+}
+
+.reward-category:last-child {
+  margin-bottom: 0;
+}
+
+.category-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+.reward-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  padding: 2px 0;
+}
+
+/* Section labels */
+.section-label {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .tier-cards {
+    grid-template-columns: 1fr;
+  }
+
+  .upgrade-cards {
+    grid-template-columns: 1fr;
+  }
+}
