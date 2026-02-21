@@ -97,8 +97,8 @@ export function renderModeToggle(mode) {
   elements.modeMulti.classList.toggle('active', mode === 'multi');
   elements.modeSingle.setAttribute('aria-pressed', mode === 'single');
   elements.modeMulti.setAttribute('aria-pressed', mode === 'multi');
-  elements.singleModeResults.style.display = mode === 'single' ? 'block' : 'none';
-  elements.multiModeResults.style.display = mode === 'multi' ? 'block' : 'none';
+  elements.singleModeResults.hidden = mode !== 'single';
+  elements.multiModeResults.hidden = mode !== 'multi';
 }
 
 export function renderMultiZonePlan() {
@@ -265,11 +265,11 @@ export function renderSingleZoneCalc(onSelectZone, onSelectTicket) {
 
   // Render zone details if selected
   if (!selectedZone) {
-    elements.zoneDetails.style.display = 'none';
+    elements.zoneDetails.hidden = true;
     return;
   }
 
-  elements.zoneDetails.style.display = 'block';
+  elements.zoneDetails.hidden = false;
   const zone = ESSENCE_ZONES[selectedZone];
   const secPool = zone.secondaries.length;
   const skillPool = zone.skills.length;

@@ -110,11 +110,11 @@ export function renderResults(container, resultsCard) {
   const results = getResults();
 
   if (!results) {
-    resultsCard.style.display = 'none';
+    resultsCard.hidden = true;
     return;
   }
 
-  resultsCard.style.display = 'block';
+  resultsCard.hidden = false;
 
   const roomsHtml = results.rooms.map((room, i) => {
     const operatorsHtml = room.operators.length > 0
