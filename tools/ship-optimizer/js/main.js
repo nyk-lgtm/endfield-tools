@@ -11,6 +11,7 @@ import {
   setEliteLevel,
   setAllEliteLevels,
   getSelectedCharactersWithElite,
+  getResults,
   setResults,
   getAssignment,
   setAssignment,
@@ -192,11 +193,19 @@ async function handleCalculateROI() {
   const selectedChars = getSelectedCharactersWithElite();
   const rooms = getRooms();
   const roomTargets = getRoomTargets();
+  const optimizerResults = getResults();
+
+  if (!optimizerResults) {
+    showToast('Run the optimizer first to get a baseline');
+    return;
+  }
 
   if (Object.keys(selectedChars).length === 0) {
     showToast('Please select at least one character');
     return;
   }
+
+  const baseline = optimizerResults.rooms.reduce((sum, r) => sum + (r.efficiency || 0), 0);
 
   const btn = document.getElementById('calculateROIBtn');
   const progress = document.getElementById('roiProgress');
@@ -208,7 +217,7 @@ async function handleCalculateROI() {
     progress.textContent = `${current}/${total}`;
   };
 
-  const results = await calculateROI(selectedChars, rooms, roomTargets, onProgress);
+  const results = await calculateROI(selectedChars, rooms, roomTargets, baseline, onProgress);
 
   btn.disabled = false;
   btn.textContent = 'Calculate ROI';

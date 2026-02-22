@@ -715,23 +715,37 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
   };
 }
 
-function getTotalEfficiency(results) {
-  return results.rooms.reduce((sum, r) => sum + (r.efficiency || 0), 0);
+/**
+ * Full optimization returning only total efficiency (skips buildResults).
+ */
+async function optimizeTotalEfficiency(selectedCharacters, rooms, roomTargets) {
+  const nexusCandidates = getControlNexusCandidates(selectedCharacters);
+  const nexusConfigs = generateNexusConfigs(nexusCandidates);
+
+  let bestEfficiency = -Infinity;
+  let configsTried = 0;
+
+  for (const nexusConfig of nexusConfigs) {
+    configsTried++;
+    const initial = greedyAssignment(selectedCharacters, rooms, roomTargets, nexusConfig);
+    const { finalEfficiency } = iterativeImprovement(initial, rooms, roomTargets, selectedCharacters);
+    if (finalEfficiency > bestEfficiency) bestEfficiency = finalEfficiency;
+    if (configsTried % 10 === 0) await new Promise(r => setTimeout(r, 0));
+  }
+
+  return bestEfficiency;
 }
 
-export async function calculateROI(selectedCharacters, rooms, roomTargets, onProgress) {
+export async function calculateROI(selectedCharacters, rooms, roomTargets, baseline, onProgress) {
   const ELITE_ORDER = ['e1', 'e2', 'e3', 'e4'];
 
   const upgradeable = Object.entries(selectedCharacters)
     .filter(([, elite]) => elite !== 'e4')
     .map(([name, elite]) => ({ name, currentElite: elite, nextElite: ELITE_ORDER[ELITE_ORDER.indexOf(elite) + 1] }));
 
-  const total = upgradeable.length + 1;
+  const total = upgradeable.length;
 
-  const baselineResults = await optimizeLayout(selectedCharacters, rooms, roomTargets, null);
-  const baseline = getTotalEfficiency(baselineResults);
-
-  if (onProgress) onProgress(1, total);
+  if (onProgress) onProgress(0, total);
 
   const results = [];
 
@@ -740,12 +754,11 @@ export async function calculateROI(selectedCharacters, rooms, roomTargets, onPro
     const modified = { ...selectedCharacters };
     modified[name] = nextElite;
 
-    const modifiedResults = await optimizeLayout(modified, rooms, roomTargets, null);
-    const newTotal = getTotalEfficiency(modifiedResults);
+    const newTotal = await optimizeTotalEfficiency(modified, rooms, roomTargets);
 
     results.push({ name, currentElite, nextElite, baselineEfficiency: baseline, newEfficiency: newTotal, delta: newTotal - baseline });
 
-    if (onProgress) onProgress(i + 2, total);
+    if (onProgress) onProgress(i + 1, total);
   }
 
   results.sort((a, b) => b.delta - a.delta);

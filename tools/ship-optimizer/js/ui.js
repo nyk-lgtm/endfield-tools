@@ -208,7 +208,7 @@ export function renderROIResults(container) {
   const roiResults = getROIResults();
 
   if (!roiResults) {
-    container.innerHTML = '<p class="hint">Select operators and configure rooms, then click Calculate ROI to find the best upgrades.</p>';
+    container.innerHTML = '<p class="hint">Run the optimizer first, then click Calculate ROI to find the best upgrades.</p>';
     return;
   }
 
