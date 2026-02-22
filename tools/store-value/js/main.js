@@ -26,9 +26,9 @@ function handleSeasonChange(e) {
 }
 
 function handlePassTierClick(e) {
-  const tierHeader = e.target.closest('.pass-tier-header');
+  const tierHeader = e.target.closest('.collapsible-header');
   if (tierHeader) {
-    const tier = tierHeader.closest('.pass-tier');
+    const tier = tierHeader.closest('.collapsible');
     tier.classList.toggle('collapsed');
     tierHeader.querySelector('.collapse-indicator').textContent =
       tier.classList.contains('collapsed') ? '▶' : '▼';

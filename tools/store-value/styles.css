@@ -24,30 +24,7 @@ input[type="checkbox"] {
 
 /* Pass tier collapsible */
 .pass-tier {
-  background: var(--color-bg-element);
-  border: 1px solid var(--color-border);
-  border-radius: 8px;
   margin-bottom: 8px;
-  overflow: hidden;
-}
-
-.pass-tier-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px;
-  cursor: pointer;
-  user-select: none;
-}
-
-.pass-tier-header:hover {
-  background: var(--color-bg-accent);
-}
-
-.collapse-indicator {
-  color: var(--color-text-muted);
-  font-size: 11px;
-  flex-shrink: 0;
 }
 
 .pass-tier-name {
@@ -72,15 +49,6 @@ input[type="checkbox"] {
   font-size: 13px;
   color: var(--color-accent);
   font-weight: 600;
-}
-
-.pass-tier-body {
-  border-top: 1px solid var(--color-border);
-  padding: 12px 14px 14px;
-}
-
-.pass-tier.collapsed .pass-tier-body {
-  display: none;
 }
 
 /* Reward sections (categories) within tiers */

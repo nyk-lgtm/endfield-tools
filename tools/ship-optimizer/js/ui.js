@@ -219,7 +219,9 @@ export function renderROIResults(container) {
     return;
   }
 
-  const tableRows = results.map((r, i) => {
+  // Section A: Top 5 upgrades (globally sorted by delta)
+  const top5 = results.slice(0, 5);
+  const top5Rows = top5.map((r, i) => {
     const rank = i + 1;
     const isTop3 = rank <= 3;
     const deltaSign = r.delta >= 0 ? '+' : '';
@@ -227,18 +229,69 @@ export function renderROIResults(container) {
       <tr class="${isTop3 ? 'roi-top' : ''}">
         <td class="roi-rank">${rank}</td>
         <td>${r.name}</td>
-        <td>${r.currentElite.toUpperCase()} → ${r.nextElite.toUpperCase()}</td>
+        <td>${r.currentElite.toUpperCase()} → ${r.targetElite.toUpperCase()}</td>
         <td class="roi-delta">${deltaSign}${r.delta.toFixed(1)}%</td>
-        <td>${r.newEfficiency.toFixed(1)}%</td>
       </tr>
+    `;
+  }).join('');
+
+  // Section B: Per-operator breakdown (grouped, collapsible)
+  const grouped = new Map();
+  for (const r of results) {
+    if (!grouped.has(r.name)) {
+      grouped.set(r.name, { currentElite: r.currentElite, entries: [] });
+    }
+    grouped.get(r.name).entries.push(r);
+  }
+
+  // Sort operators by their best delta (descending)
+  const sortedOperators = [...grouped.entries()]
+    .sort((a, b) => b[1].entries[0].delta - a[1].entries[0].delta);
+
+  const operatorRows = sortedOperators.map(([name, { currentElite, entries }]) => {
+    const bestDelta = entries[0].delta;
+    const bestSign = bestDelta >= 0 ? '+' : '';
+
+    const subRows = entries.map(r => {
+      const deltaSign = r.delta >= 0 ? '+' : '';
+      return `
+        <tr>
+          <td>${r.currentElite.toUpperCase()} → ${r.targetElite.toUpperCase()}</td>
+          <td class="roi-delta">${deltaSign}${r.delta.toFixed(1)}%</td>
+        </tr>
+      `;
+    }).join('');
+
+    return `
+      <div class="collapsible roi-operator-group collapsed">
+        <div class="collapsible-header">
+          <span class="collapse-indicator">▸</span>
+          <span class="roi-operator-name">${name}</span>
+          <span class="roi-operator-elite">${currentElite.toUpperCase()}</span>
+          <span class="roi-operator-best roi-delta">${bestSign}${bestDelta.toFixed(1)}%</span>
+        </div>
+        <div class="collapsible-body">
+          <table class="roi-table">
+            <thead>
+              <tr>
+                <th>Upgrade</th>
+                <th>Δ Efficiency</th>
+              </tr>
+            </thead>
+            <tbody>${subRows}</tbody>
+          </table>
+        </div>
+      </div>
     `;
   }).join('');
 
   container.innerHTML = `
     <div class="roi-baseline">
-      <span class="roi-baseline-label">Current total efficiency</span>
+      <span class="roi-baseline-label">Effective efficiency</span>
       <span class="roi-baseline-value">${baseline.toFixed(1)}%</span>
     </div>
+
+    <h3 class="roi-section-title">Top 5 Upgrades</h3>
     <table class="roi-table">
       <thead>
         <tr>
@@ -246,12 +299,25 @@ export function renderROIResults(container) {
           <th>Operator</th>
           <th>Upgrade</th>
           <th>Δ Efficiency</th>
-          <th>New Total</th>
         </tr>
       </thead>
       <tbody>
-        ${tableRows}
+        ${top5Rows}
       </tbody>
     </table>
+
+    <h3 class="roi-section-title">Per-Operator Breakdown</h3>
+    <div class="roi-operator-list">
+      ${operatorRows}
+    </div>
   `;
+
+  // Toggle expand/collapse on operator headers
+  container.querySelectorAll('.collapsible-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const group = header.closest('.collapsible');
+      const collapsed = group.classList.toggle('collapsed');
+      header.querySelector('.collapse-indicator').textContent = collapsed ? '▸' : '▾';
+    });
+  });
 }

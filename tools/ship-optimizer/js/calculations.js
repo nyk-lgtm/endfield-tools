@@ -739,24 +739,29 @@ async function optimizeTotalEfficiency(selectedCharacters, rooms, roomTargets) {
 export async function calculateROI(selectedCharacters, rooms, roomTargets, baseline, onProgress) {
   const ELITE_ORDER = ['e1', 'e2', 'e3', 'e4'];
 
-  const upgradeable = Object.entries(selectedCharacters)
-    .filter(([, elite]) => elite !== 'e4')
-    .map(([name, elite]) => ({ name, currentElite: elite, nextElite: ELITE_ORDER[ELITE_ORDER.indexOf(elite) + 1] }));
+  // Build all (operator, targetElite) pairs for every reachable level
+  const pairs = [];
+  for (const [name, elite] of Object.entries(selectedCharacters)) {
+    if (elite === 'e4') continue;
+    const currentIdx = ELITE_ORDER.indexOf(elite);
+    for (let t = currentIdx + 1; t < ELITE_ORDER.length; t++) {
+      pairs.push({ name, currentElite: elite, targetElite: ELITE_ORDER[t] });
+    }
+  }
 
-  const total = upgradeable.length;
-
+  const total = pairs.length;
   if (onProgress) onProgress(0, total);
 
   const results = [];
 
-  for (let i = 0; i < upgradeable.length; i++) {
-    const { name, currentElite, nextElite } = upgradeable[i];
+  for (let i = 0; i < pairs.length; i++) {
+    const { name, currentElite, targetElite } = pairs[i];
     const modified = { ...selectedCharacters };
-    modified[name] = nextElite;
+    modified[name] = targetElite;
 
-    const newTotal = await optimizeTotalEfficiency(modified, rooms, roomTargets);
+    const newEfficiency = await optimizeTotalEfficiency(modified, rooms, roomTargets);
 
-    results.push({ name, currentElite, nextElite, baselineEfficiency: baseline, newEfficiency: newTotal, delta: newTotal - baseline });
+    results.push({ name, currentElite, targetElite, newEfficiency, delta: newEfficiency - baseline });
 
     if (onProgress) onProgress(i + 1, total);
   }

@@ -294,6 +294,42 @@ td { padding: 8px 12px; color: var(--color-text-secondary); border-bottom: 1px s
   margin-bottom: 16px;
 }
 
+/* Collapsible sections */
+.collapsible {
+  background: var(--color-bg-element);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.collapsible-header:hover {
+  background: var(--color-bg-accent);
+}
+
+.collapse-indicator {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  flex-shrink: 0;
+}
+
+.collapsible-body {
+  border-top: 1px solid var(--color-border);
+  padding: 12px 14px 14px;
+}
+
+.collapsible.collapsed .collapsible-body {
+  display: none;
+}
+
 /* Utility */
 .text-error { color: var(--color-error); }
 .text-muted { color: var(--color-text-muted); }

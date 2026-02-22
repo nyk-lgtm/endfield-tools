@@ -482,6 +482,39 @@
   color: var(--color-accent);
 }
 
+/* ROI Drill-down */
+.roi-section-title {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 600;
+  margin: 20px 0 8px;
+}
+
+.roi-operator-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.roi-operator-name {
+  flex: 1;
+  font-weight: 600;
+  color: var(--color-white);
+}
+
+.roi-operator-elite {
+  font-size: 13px;
+  color: var(--color-text-muted);
+}
+
+.roi-operator-best {
+  font-weight: 600;
+}
+
+.roi-operator-group .collapsible-body .roi-table {
+  font-size: 13px;
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .room-config {

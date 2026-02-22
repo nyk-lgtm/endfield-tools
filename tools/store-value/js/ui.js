@@ -99,8 +99,8 @@ export function renderPassView(seasonKey) {
       body += renderCategoryTable(passData, tierTotals, tierKey, cat, tierSanity.categories[cat] ?? 0);
     }
 
-    return `<div class="pass-tier${expanded ? '' : ' collapsed'}">
-      <div class="pass-tier-header">
+    return `<div class="collapsible pass-tier${expanded ? '' : ' collapsed'}">
+      <div class="collapsible-header pass-tier-header">
         <span class="collapse-indicator">${expanded ? '\u25bc' : '\u25b6'}</span>
         <div class="pass-tier-name">${info.name}</div>
         <div class="pass-tier-meta">
@@ -108,7 +108,7 @@ export function renderPassView(seasonKey) {
           <span class="pass-tier-sanity">~${tierSanity.total.toLocaleString()} sanity</span>
         </div>
       </div>
-      <div class="pass-tier-body">${body}</div>
+      <div class="collapsible-body pass-tier-body">${body}</div>
     </div>`;
   }).join('');
 }
