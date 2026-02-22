@@ -426,6 +426,62 @@
   color: var(--color-text-subtle);
 }
 
+/* ROI View */
+.roi-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.roi-baseline {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--color-bg-element);
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.roi-baseline-label {
+  color: var(--color-text-muted);
+  font-size: 14px;
+}
+
+.roi-baseline-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-success);
+}
+
+.roi-table {
+  width: 100%;
+}
+
+.roi-table th {
+  font-size: 11px;
+}
+
+.roi-rank {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.roi-delta {
+  color: var(--color-success);
+  font-weight: 600;
+}
+
+.roi-top td {
+  color: var(--color-accent);
+}
+
+.roi-top .roi-delta {
+  color: var(--color-accent);
+}
+
 /* Responsive */
 @media (max-width: 600px) {
   .room-config {

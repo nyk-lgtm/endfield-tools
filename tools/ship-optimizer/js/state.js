@@ -21,7 +21,7 @@ function loadState() {
     selectedCharacters: {},
   };
 
-  if (!saved) return { ...defaults, results: null, assignment: null, optimizerConfig: null };
+  if (!saved) return { ...defaults, results: null, assignment: null, optimizerConfig: null, roiResults: null };
 
   // Merge saved elite levels with current character list (handles new characters)
   const eliteLevels = initEliteLevels();
@@ -47,6 +47,7 @@ function loadState() {
     results: null,
     assignment: null,
     optimizerConfig: null,
+    roiResults: null,
   };
 }
 
@@ -172,4 +173,12 @@ export function getOptimizerConfig() {
 
 export function setOptimizerConfig(config) {
   state.optimizerConfig = config;
+}
+
+export function getROIResults() {
+  return state.roiResults;
+}
+
+export function setROIResults(results) {
+  state.roiResults = results;
 }

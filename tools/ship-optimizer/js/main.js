@@ -16,10 +16,11 @@ import {
   setAssignment,
   getOptimizerConfig,
   setOptimizerConfig,
-  getAllEliteLevels
+  getAllEliteLevels,
+  setROIResults
 } from './state.js';
-import { renderRoomConfig, renderCharacterList, renderResults } from './ui.js';
-import { optimizeLayout, buildResults, MAX_OPERATORS_PER_ROOM } from './calculations.js';
+import { renderRoomConfig, renderCharacterList, renderResults, renderROIResults } from './ui.js';
+import { optimizeLayout, buildResults, MAX_OPERATORS_PER_ROOM, calculateROI } from './calculations.js';
 import { initHelpModal } from '../../../shared/modal.js';
 import { initNav } from '../../../shared/nav.js';
 import { showToast } from '../../../shared/toast.js';
@@ -30,7 +31,10 @@ const elements = {
   characterList: null,
   resultsCard: null,
   resultsContainer: null,
-  staleHint: null
+  staleHint: null,
+  roiView: null,
+  optimizerView: null,
+  roiResultsContainer: null,
 };
 
 function cacheElements() {
@@ -39,6 +43,9 @@ function cacheElements() {
   elements.resultsCard = document.getElementById('resultsCard');
   elements.resultsContainer = document.getElementById('resultsContainer');
   elements.staleHint = document.getElementById('staleHint');
+  elements.roiView = document.getElementById('roiView');
+  elements.optimizerView = document.getElementById('optimizerView');
+  elements.roiResultsContainer = document.getElementById('roiResultsContainer');
 }
 
 function markStale() {
@@ -161,6 +168,54 @@ async function handleOptimize() {
   setResults(results);
   renderResults(elements.resultsContainer, elements.resultsCard);
   elements.staleHint.hidden = true;
+}
+
+function handleViewToggle(e) {
+  if (!e.target.classList.contains('toggle-btn')) return;
+
+  const view = e.target.dataset.view;
+
+  document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.view === view);
+  });
+
+  elements.optimizerView.hidden = view !== 'optimizer';
+  elements.roiView.hidden = view !== 'roi';
+
+  // Render ROI results when switching to ROI view
+  if (view === 'roi') {
+    renderROIResults(elements.roiResultsContainer);
+  }
+}
+
+async function handleCalculateROI() {
+  const selectedChars = getSelectedCharactersWithElite();
+  const rooms = getRooms();
+  const roomTargets = getRoomTargets();
+
+  if (Object.keys(selectedChars).length === 0) {
+    showToast('Please select at least one character');
+    return;
+  }
+
+  const btn = document.getElementById('calculateROIBtn');
+  const progress = document.getElementById('roiProgress');
+
+  btn.disabled = true;
+  btn.textContent = 'Calculating...';
+
+  const onProgress = (current, total) => {
+    progress.textContent = `${current}/${total}`;
+  };
+
+  const results = await calculateROI(selectedChars, rooms, roomTargets, onProgress);
+
+  btn.disabled = false;
+  btn.textContent = 'Calculate ROI';
+  progress.textContent = '';
+
+  setROIResults(results);
+  renderROIResults(elements.roiResultsContainer);
 }
 
 // Drag-and-drop handlers for result operators and character list
@@ -330,6 +385,12 @@ function init() {
 
   // Optimize button
   document.getElementById('optimizeBtn').addEventListener('click', handleOptimize);
+
+  // View toggle
+  document.querySelector('.toggle-group').addEventListener('click', handleViewToggle);
+
+  // ROI calculation
+  document.getElementById('calculateROIBtn').addEventListener('click', handleCalculateROI);
 
   // Drag-and-drop on results
   elements.resultsContainer.addEventListener('dragstart', handleResultDragStart);

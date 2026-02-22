@@ -4,7 +4,8 @@ import {
   getRoomTarget,
   isCharacterSelected,
   getEliteLevel,
-  getResults
+  getResults,
+  getROIResults
 } from './state.js';
 
 const GROWTH_PRODUCTS = ['Fungal Matter', 'Plant', 'Rare Mineral'];
@@ -200,5 +201,57 @@ export function renderResults(container, resultsCard) {
       ${roomsHtml}
     </div>
     ${summaryHtml}
+  `;
+}
+
+export function renderROIResults(container) {
+  const roiResults = getROIResults();
+
+  if (!roiResults) {
+    container.innerHTML = '<p class="hint">Select operators and configure rooms, then click Calculate ROI to find the best upgrades.</p>';
+    return;
+  }
+
+  const { baseline, results } = roiResults;
+
+  if (results.length === 0) {
+    container.innerHTML = '<p class="hint">All selected operators are already at E4.</p>';
+    return;
+  }
+
+  const tableRows = results.map((r, i) => {
+    const rank = i + 1;
+    const isTop3 = rank <= 3;
+    const deltaSign = r.delta >= 0 ? '+' : '';
+    return `
+      <tr class="${isTop3 ? 'roi-top' : ''}">
+        <td class="roi-rank">${rank}</td>
+        <td>${r.name}</td>
+        <td>${r.currentElite.toUpperCase()} → ${r.nextElite.toUpperCase()}</td>
+        <td class="roi-delta">${deltaSign}${r.delta.toFixed(1)}%</td>
+        <td>${r.newEfficiency.toFixed(1)}%</td>
+      </tr>
+    `;
+  }).join('');
+
+  container.innerHTML = `
+    <div class="roi-baseline">
+      <span class="roi-baseline-label">Current total efficiency</span>
+      <span class="roi-baseline-value">${baseline.toFixed(1)}%</span>
+    </div>
+    <table class="roi-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Operator</th>
+          <th>Upgrade</th>
+          <th>Δ Efficiency</th>
+          <th>New Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${tableRows}
+      </tbody>
+    </table>
   `;
 }

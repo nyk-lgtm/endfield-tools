@@ -714,3 +714,41 @@ export function buildResults(assignment, rooms, roomTargets, eliteLevels, swapsM
     }
   };
 }
+
+function getTotalEfficiency(results) {
+  return results.rooms.reduce((sum, r) => sum + (r.efficiency || 0), 0);
+}
+
+export async function calculateROI(selectedCharacters, rooms, roomTargets, onProgress) {
+  const ELITE_ORDER = ['e1', 'e2', 'e3', 'e4'];
+
+  const upgradeable = Object.entries(selectedCharacters)
+    .filter(([, elite]) => elite !== 'e4')
+    .map(([name, elite]) => ({ name, currentElite: elite, nextElite: ELITE_ORDER[ELITE_ORDER.indexOf(elite) + 1] }));
+
+  const total = upgradeable.length + 1;
+
+  const baselineResults = await optimizeLayout(selectedCharacters, rooms, roomTargets, null);
+  const baseline = getTotalEfficiency(baselineResults);
+
+  if (onProgress) onProgress(1, total);
+
+  const results = [];
+
+  for (let i = 0; i < upgradeable.length; i++) {
+    const { name, currentElite, nextElite } = upgradeable[i];
+    const modified = { ...selectedCharacters };
+    modified[name] = nextElite;
+
+    const modifiedResults = await optimizeLayout(modified, rooms, roomTargets, null);
+    const newTotal = getTotalEfficiency(modifiedResults);
+
+    results.push({ name, currentElite, nextElite, baselineEfficiency: baseline, newEfficiency: newTotal, delta: newTotal - baseline });
+
+    if (onProgress) onProgress(i + 2, total);
+  }
+
+  results.sort((a, b) => b.delta - a.delta);
+
+  return { baseline, results };
+}
