@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gacha Calc</title>
+  <link rel="stylesheet" href="../../shared/styles.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <div class="title-row">
+      <h1>Gacha Calc</h1>
+      <button class="btn-icon help-btn">?</button>
+    </div>
+
+    <!-- Mode toggle: Single Banner / Multi Banner -->
+    <div class="toggle-group">
+      <button class="toggle-btn active" data-mode="single">Single Banner</button>
+      <button class="toggle-btn" data-mode="multi">Multi-Banner</button>
+    </div>
+
+    <!-- Single Banner Panel -->
+    <div id="singlePanel">
+      <div class="card">
+        <h2>Banner Settings</h2>
+        <div class="input-grid">
+          <div class="input-field">
+            <label>Current Pity</label>
+            <input type="number" id="pityInput" min="0" max="79" value="0">
+          </div>
+          <div class="input-field">
+            <label>Available Pulls</label>
+            <input type="number" id="pullsInput" min="0" max="9999" value="100">
+          </div>
+          <div class="input-field toggle-field">
+            <label>Guaranteed Featured</label>
+            <div class="switch-row">
+              <span class="switch-label" id="guaranteedLabel">No</span>
+              <button class="toggle-switch" id="guaranteedToggle">
+                <span class="toggle-thumb"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Results -->
+      <div class="flex flex-wrap gap-md mb-lg" id="singleStats">
+        <!-- Filled by JS: stat boxes for probability, expected pulls, 50%/90% thresholds -->
+      </div>
+
+      <!-- CDF Chart -->
+      <div class="card" id="chartCard">
+        <h2>Cumulative Probability</h2>
+        <div class="chart-container">
+          <canvas id="cdfChart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi-Banner Panel -->
+    <div id="multiPanel" hidden>
+      <div class="card">
+        <h2>Planning Settings</h2>
+        <div class="input-grid">
+          <div class="input-field">
+            <label>Total Pulls</label>
+            <input type="number" id="multiPullsInput" min="0" max="9999" value="100">
+          </div>
+          <div class="input-field">
+            <label>Current Pity</label>
+            <input type="number" id="multiPityInput" min="0" max="79" value="0">
+          </div>
+          <div class="input-field toggle-field">
+            <label>Guaranteed Featured</label>
+            <div class="switch-row">
+              <span class="switch-label" id="multiGuaranteedLabel">No</span>
+              <button class="toggle-switch" id="multiGuaranteedToggle">
+                <span class="toggle-thumb"></span>
+              </button>
+            </div>
+          </div>
+          <div class="input-field">
+            <label>Number of Banners</label>
+            <input type="number" id="bannerCountInput" min="1" max="5" value="2">
+          </div>
+        </div>
+      </div>
+
+      <!-- Multi-banner results -->
+      <div id="multiResults"></div>
+    </div>
+  </div>
+
+  <!-- Help Modal -->
+  <div class="modal-overlay" id="helpModal">
+    <div class="modal">
+      <button class="modal-close">&times;</button>
+      <h2>How It Works</h2>
+      <p><strong>Pity System</strong></p>
+      <p>Base 6★ rate is <code>0.8%</code> per pull. Starting at pull 65, the rate increases by <code>5%</code> per pull. Pull 80 guarantees a 6★.</p>
+      <p><strong>50/50 System</strong></p>
+      <p>When you pull a 6★, there's a 50% chance it's the featured character. If you lose the 50/50, your next 6★ is guaranteed to be featured.</p>
+      <p><strong>120-Pull Safety Net</strong></p>
+      <p>If you haven't gotten the featured character within 120 pulls on a banner, you're guaranteed to receive them. This does not carry over between banners.</p>
+      <p><strong>Single Banner</strong></p>
+      <p>Enter your current pity and available pulls to see the probability of getting the featured character, expected pulls needed, and a cumulative distribution chart.</p>
+      <p><strong>Multi-Banner Planning</strong></p>
+      <p>Plan across multiple banners. Each subsequent banner assumes fresh pity (0) and no guarantee, with remaining pulls after the expected cost of previous banners.</p>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="../../shared/todo.js"></script>
+</body>
+</html>
